@@ -3,124 +3,676 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fuego AR — Monitor de Incendios</title>
+  <title>Fuego AR — Monitor de Incendios Argentina</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
   <style>
-    body { margin: 0; padding: 0; font-family: sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Barlow', sans-serif; background: #0d0d0d; color: #e8e8e8; }
     #mapa { height: 100vh; width: 100%; }
-    #titulo {
+
+    #header {
       position: absolute;
-      top: 16px; left: 50%;
-      transform: translateX(-50%);
-      background: white;
-      padding: 8px 20px;
-      border-radius: 8px;
-      font-size: 15px;
-      font-weight: 500;
-      z-index: 1000;
-      box-shadow: 0 1px 6px rgba(0,0,0,0.15);
+      top: 0; left: 0; right: 0;
+      height: 52px;
+      background: rgba(13,13,13,0.92);
+      backdrop-filter: blur(8px);
+      z-index: 1001;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
     }
-    #leyenda {
-      position: absolute;
-      bottom: 30px;
-      right: 10px;
-      background: white;
-      padding: 12px 16px;
-      border-radius: 8px;
+
+    #logo {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: #ff4500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    #logo span { color: #e8e8e8; }
+    #contador-header { font-size: 13px; color: rgba(255,255,255,0.5); margin-left: auto; }
+    #contador-header strong { color: #ff6b35; font-size: 15px; }
+
+    #btn-filtros, #btn-toggle-focos {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #e8e8e8;
+      padding: 6px 14px;
+      border-radius: 6px;
       font-size: 13px;
-      z-index: 1000;
-      box-shadow: 0 1px 6px rgba(0,0,0,0.15);
-      line-height: 1.8;
+      font-family: 'Barlow', sans-serif;
+      cursor: pointer;
+      transition: background .2s;
     }
-    #leyenda b { display: block; margin-bottom: 6px; font-size: 13px; }
-    .leyenda-item { display: flex; align-items: center; gap: 8px; }
-    .circulo { border-radius: 50%; border: 1.5px solid white; outline: 1px solid #ccc; flex-shrink: 0; }
-    #contador {
+
+    #btn-filtros:hover, #btn-toggle-focos:hover { background: rgba(255,255,255,0.14); }
+    #btn-toggle-focos.oculto { opacity: 0.4; }
+
+    #panel-filtros {
       position: absolute;
-      top: 16px; left: 16px;
-      background: white;
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-size: 13px;
+      top: 62px; left: 10px;
+      width: 280px;
+      background: rgba(18,18,18,0.96);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
       z-index: 1000;
-      box-shadow: 0 1px 6px rgba(0,0,0,0.15);
+      padding: 16px;
+      display: none;
     }
-    #contador span { font-weight: 500; color: #E24B4A; font-size: 16px; }
+
+    #panel-filtros.visible { display: block; }
+
+    .filtro-titulo {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 8px;
+      margin-top: 14px;
+    }
+
+    .filtro-titulo:first-child { margin-top: 0; }
+
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 0;
+      cursor: pointer;
+      font-size: 13px;
+      color: #e8e8e8;
+    }
+
+    .check-row input[type=checkbox] { accent-color: #ff4500; width: 14px; height: 14px; cursor: pointer; }
+    .dot-conf { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+    .frp-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.6);
+    }
+
+    #frp-valor { color: #ff6b35; font-weight: 600; }
+    input[type=range] { width: 100%; accent-color: #ff4500; cursor: pointer; }
+    .fecha-row { display: flex; flex-direction: column; gap: 6px; }
+    .fecha-row label { font-size: 12px; color: rgba(255,255,255,0.5); }
+
+    .fecha-row input[type=date] {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #e8e8e8;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: 'Barlow', sans-serif;
+      width: 100%;
+      cursor: pointer;
+    }
+
+    .nota { font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 4px; }
+
+    #btn-aplicar {
+      margin-top: 14px;
+      width: 100%;
+      background: #ff4500;
+      border: none;
+      color: white;
+      padding: 8px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: 'Barlow', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    #btn-aplicar:hover { background: #e03d00; }
+
     #loading {
       position: absolute;
       top: 50%; left: 50%;
       transform: translate(-50%, -50%);
-      background: white;
-      padding: 12px 24px;
-      border-radius: 8px;
+      background: rgba(13,13,13,0.95);
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 14px 28px;
+      border-radius: 10px;
       font-size: 14px;
+      color: #e8e8e8;
       z-index: 2000;
-      box-shadow: 0 1px 6px rgba(0,0,0,0.15);
+    }
+
+    /* Panel Sentinel inferior */
+    #sentinel-panel {
+      position: absolute;
+      bottom: 20px; left: 50%;
+      transform: translateX(-50%);
+      background: rgba(18,18,18,0.97);
+      border: 1px solid #ff4500;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 12px;
+      color: #e8e8e8;
+      z-index: 1000;
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      min-width: 360px;
+    }
+
+    #sentinel-panel.visible { display: flex; }
+
+    .sentinel-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .sentinel-tipo { font-size: 13px; font-weight: 600; color: #ff6b35; }
+
+    .sentinel-label-fechas {
+      font-size: 10px;
+      color: rgba(255,255,255,0.3);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 6px;
+    }
+
+    .fechas-sentinel { display: flex; gap: 6px; }
+
+    .btn-fecha-sentinel {
+      flex: 1;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #e8e8e8;
+      padding: 7px 6px;
+      border-radius: 6px;
+      font-size: 11px;
+      cursor: pointer;
+      font-family: 'Barlow', sans-serif;
+      text-align: center;
+      transition: background .15s;
+      line-height: 1.5;
+    }
+
+    .btn-fecha-sentinel:hover { background: rgba(255,255,255,0.15); }
+    .btn-fecha-sentinel.activo { background: #ff4500; border-color: #ff4500; color: white; }
+
+    .btn-fecha-label {
+      font-size: 9px;
+      opacity: .5;
+      display: block;
+      margin-bottom: 1px;
+    }
+
+    #btn-cerrar-sentinel {
+      background: none;
+      border: 1px solid #E24B4A;
+      color: #E24B4A;
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+      font-family: 'Barlow', sans-serif;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .icono-fuego {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.3);
+      cursor: pointer;
+      transition: transform .15s;
+    }
+
+    .icono-fuego:hover { transform: scale(1.3); }
+
+    .leaflet-popup { margin-top: 52px; }
+
+    .leaflet-popup-content-wrapper {
+      background: rgba(18,18,18,0.97) !important;
+      border: 1px solid rgba(255,255,255,0.12) !important;
+      border-radius: 10px !important;
+      color: #e8e8e8 !important;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
+    }
+
+    .leaflet-popup-tip { background: rgba(18,18,18,0.97) !important; }
+
+    .leaflet-popup-close-button {
+      color: #E24B4A !important;
+      font-size: 18px !important;
+      font-weight: 700 !important;
+      top: 6px !important;
+      right: 8px !important;
+    }
+
+    .popup-titulo {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: #ff6b35;
+      margin-bottom: 10px;
+    }
+
+    .popup-fila {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      font-size: 12px;
+    }
+
+    .popup-fila:last-child { border-bottom: none; }
+    .popup-key { color: rgba(255,255,255,0.45); }
+    .popup-val { color: #e8e8e8; font-weight: 500; text-align: right; }
+    .conf-alta { color: #ff4500; }
+    .conf-nominal { color: #ffaa00; }
+    .conf-baja { color: rgba(255,255,255,0.4); }
+
+    .btn-popup {
+      display: block;
+      text-align: center;
+      padding: 7px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 6px;
+      cursor: pointer;
+      border: none;
+      width: 100%;
+      font-family: 'Barlow', sans-serif;
     }
   </style>
 </head>
 <body>
 
-  <div id="titulo">Fuego AR — Focos activos Argentina</div>
-  <div id="contador">Focos activos: <span id="num-focos">cargando...</span></div>
-  <div id="loading">Cargando datos...</div>
+  <div id="header">
+    <div id="logo">🔥 <span>FUEGO</span>AR</div>
+    <button id="btn-filtros" onclick="toggleFiltros()">⚙ Filtros</button>
+    <button id="btn-toggle-focos" onclick="toggleFocos()">🔥 Ocultar focos</button>
+    <div id="contador-header">Focos activos: <strong id="num-focos">—</strong></div>
+  </div>
 
-  <div id="leyenda">
-    <b>Intensidad del foco</b>
-    <div class="leyenda-item">
-      <div class="circulo" style="width:20px;height:20px;background:#8B0000;"></div>
-      Alta
+  <div id="panel-filtros">
+    <div class="filtro-titulo">Confiabilidad</div>
+    <label class="check-row">
+      <input type="checkbox" id="conf-alta" checked>
+      <span class="dot-conf" style="background:#ff4500"></span>Alta
+    </label>
+    <label class="check-row">
+      <input type="checkbox" id="conf-nominal" checked>
+      <span class="dot-conf" style="background:#ffaa00"></span>Nominal
+    </label>
+    <label class="check-row">
+      <input type="checkbox" id="conf-baja">
+      <span class="dot-conf" style="background:rgba(200,200,200,0.5)"></span>Baja
+    </label>
+
+    <div class="filtro-titulo">Potencia mínima (FRP)</div>
+    <div class="frp-row">
+      <span>Umbral mínimo</span>
+      <span><span id="frp-valor">0</span> MW</span>
     </div>
-    <div class="leyenda-item">
-      <div class="circulo" style="width:14px;height:14px;background:#E24B4A;"></div>
-      Media
+    <input type="range" id="frp-slider" min="0" max="100" value="0"
+      oninput="document.getElementById('frp-valor').textContent = this.value">
+
+    <div class="filtro-titulo">Día específico</div>
+    <div class="fecha-row">
+      <label>Dejá vacío para ver las últimas 48hs</label>
+      <input type="date" id="fecha-especifica">
+      <div class="nota">Máximo 7 días atrás · NASA FIRMS</div>
     </div>
-    <div class="leyenda-item">
-      <div class="circulo" style="width:10px;height:10px;background:#FFA500;"></div>
-      Baja
+
+    <button id="btn-aplicar" onclick="cargarDatos()">Aplicar filtros</button>
+  </div>
+
+  <!-- Panel Sentinel inferior con botones A/B/C -->
+  <div id="sentinel-panel">
+    <div class="sentinel-row">
+      <span class="sentinel-tipo" id="sentinel-tipo-txt">🛰 Sentinel-2</span>
+      <button id="btn-cerrar-sentinel" onclick="cerrarSentinel()">✕ Cerrar</button>
     </div>
-    <div style="margin-top:8px; font-size:11px; color:#888;">
-      Fuente: VIIRS · NASA FIRMS<br>
-      Últimas 48 horas · FRP &gt; 10 MW
+    <div>
+      <div class="sentinel-label-fechas">Imágenes disponibles — seleccioná para comparar</div>
+      <div class="fechas-sentinel" id="fechas-sentinel-btns">
+        <div class="nota">Buscando imágenes reales...</div>
+      </div>
     </div>
   </div>
 
+  <div id="loading">Cargando focos de NASA...</div>
   <div id="mapa"></div>
 
   <script>
-    var mapa = L.map('mapa').setView([-38, -63], 5);
+    var mapa = L.map('mapa', { zoomControl: false }).setView([-38, -63], 4);
+    L.control.zoom({ position: 'bottomright' }).addTo(mapa);
 
-    var satelital = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-      attribution: 'Esri World Imagery'
-    });
-
-    var ign = L.tileLayer('https://wms.ign.gob.ar/geoserver/gwc/service/tms/1.0.0/capabaseargenmap@EPSG%3A3857@png/{z}/{x}/{-y}.png', {
-      attribution: 'IGN Argentina',
-      minZoom: 3,
-      maxZoom: 18
-    });
-
-    var hibrido = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
-      attribution: 'Google Hybrid'
-    });
+    var satelital = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri' });
+    var ign = L.tileLayer('https://wms.ign.gob.ar/geoserver/gwc/service/tms/1.0.0/capabaseargenmap@EPSG%3A3857@png/{z}/{x}/{-y}.png', { attribution: 'IGN Argentina', minZoom: 3, maxZoom: 18 });
+    var hibrido = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', { attribution: 'Google' });
 
     satelital.addTo(mapa);
-    L.control.layers({
-      "ESRI Satelital": satelital,
-      "IGN Argentina": ign,
-      "Google Híbrido": hibrido
-    }).addTo(mapa);
 
+    var controlCapas = L.control.layers(
+      { "Satelital (ESRI)": satelital, "IGN Argentina": ign, "Híbrido (Google)": hibrido },
+      {},
+      { position: 'bottomright' }
+    ).addTo(mapa);
+
+    var hoy = new Date().toISOString().split('T')[0];
+    document.getElementById('fecha-especifica').setAttribute('max', hoy);
+
+    var capaSentinel = null;
+    var sentinelParams = null;
+    var focosVisibles = true;
+    var primeraVezSentinel = true;
+    var INSTANCE_ID = 'c87c1637-7fee-40c3-96fa-f9037b487389';
+
+    // ── Helpers de fecha ──────────────────────────────────────────────────────
+    function formatFecha(iso) {
+      var p = iso.split('-');
+      return p[2] + '/' + p[1] + '/' + p[0];
+    }
+
+    function addDays(isoDate, days) {
+      var d = new Date(isoDate);
+      d.setDate(d.getDate() + days);
+      return d.toISOString().split('T')[0];
+    }
+
+    function diffDays(a, b) {
+      return Math.round((new Date(a) - new Date(b)) / 86400000);
+    }
+
+    // ── UI general ────────────────────────────────────────────────────────────
+    function toggleFiltros() {
+      document.getElementById('panel-filtros').classList.toggle('visible');
+    }
+
+    function toggleFocos() {
+      focosVisibles = !focosVisibles;
+      var btn = document.getElementById('btn-toggle-focos');
+      if (focosVisibles) {
+        mapa.addLayer(capaFocos);
+        btn.textContent = '🔥 Ocultar focos';
+        btn.classList.remove('oculto');
+      } else {
+        mapa.removeLayer(capaFocos);
+        btn.textContent = '🔥 Mostrar focos';
+        btn.classList.add('oculto');
+      }
+    }
+
+    // ── Sentinel: cerrar ──────────────────────────────────────────────────────
+    function cerrarSentinel() {
+      if (capaSentinel) {
+        controlCapas.removeLayer(capaSentinel);
+        mapa.removeLayer(capaSentinel);
+        capaSentinel = null;
+        sentinelParams = null;
+      }
+      primeraVezSentinel = true;
+      document.getElementById('sentinel-panel').classList.remove('visible');
+    }
+
+    // ── Sentinel: cargar capa WMS con fecha exacta ────────────────────────────
+    function cargarCapaSentinel(lat, lng, fechaImg, tipo, aplicarZoom) {
+      if (capaSentinel) {
+        controlCapas.removeLayer(capaSentinel);
+        mapa.removeLayer(capaSentinel);
+        capaSentinel = null;
+      }
+
+      // Marcar botón activo
+      document.querySelectorAll('.btn-fecha-sentinel').forEach(function(btn) {
+        btn.classList.toggle('activo', btn.dataset.fecha === fechaImg);
+      });
+
+      // Ventana exacta de 1 día — evita que el WMS muestre una imagen de otra fecha
+      var timeParam = fechaImg + 'T00:00:00.000Z/' + fechaImg + 'T23:59:59.000Z';
+
+      var layerName = tipo === 'swir' ? 'SWIR' : 'TRUE_COLOR';
+      var etiqueta  = tipo === 'swir' ? '🔴 Sentinel SWIR' : '🛰 Sentinel Color';
+
+      var delta = 0.3;
+      var bounds = L.latLngBounds([lat - delta, lng - delta], [lat + delta, lng + delta]);
+
+      capaSentinel = L.tileLayer.wms(
+        'https://sh.dataspace.copernicus.eu/ogc/wms/' + INSTANCE_ID, {
+          layers: layerName,
+          format: 'image/jpeg',
+          transparent: false,
+          time: timeParam,
+          maxcc: 100,
+          tileSize: 512,
+          bounds: bounds,
+          MOSAICKING_ORDER: 'mostRecentPixel',
+          attribution: 'Sentinel-2 L2A · Copernicus ESA'
+        }
+      );
+
+      capaSentinel.addTo(mapa);
+      controlCapas.addOverlay(capaSentinel, etiqueta + ' · ' + formatFecha(fechaImg));
+
+      if (aplicarZoom) {
+        mapa.setView([lat, lng], 13);
+      }
+
+      document.getElementById('sentinel-tipo-txt').textContent = etiqueta + ' · ' + formatFecha(fechaImg);
+    }
+
+    // ── Sentinel: renderizar botones A/B/C ────────────────────────────────────
+    function renderizarBotonesFechas(seleccion, lat, lng, fechaFoco, tipo, imgB) {
+      var contenedor = document.getElementById('fechas-sentinel-btns');
+      if (seleccion.length === 0) {
+        contenedor.innerHTML = '<div class="nota">No hay imágenes disponibles para esta ubicación.</div>';
+        return;
+      }
+
+      var rolLabel = { 'A': 'anterior', 'B': 'más cercana', 'C': 'posterior' };
+
+      var html = '';
+      seleccion.forEach(function(s) {
+        var nubesTexto = s.item.nubes !== null ? '☁ ' + s.item.nubes + '%' : '☁ estimada';
+        html += '<button class="btn-fecha-sentinel" data-fecha="' + s.item.fecha + '" ' +
+          'onclick="cargarCapaSentinel(' + lat + ',' + lng + ',\'' + s.item.fecha + '\',\'' + tipo + '\', false)">' +
+          '<span class="btn-fecha-label">' + rolLabel[s.rol] + '</span>' +
+          formatFecha(s.item.fecha) + '<br>' +
+          '<span style="font-size:10px;opacity:.6;">' + nubesTexto + '</span>' +
+          '</button>';
+      });
+
+      contenedor.innerHTML = html;
+
+      // Cargar automáticamente B (más cercana al foco), con zoom solo la primera vez
+      cargarCapaSentinel(lat, lng, imgB.fecha, tipo, primeraVezSentinel);
+      primeraVezSentinel = false;
+    }
+
+    // ── Sentinel: buscar fechas reales en catálogo STAC ───────────────────────
+    // Fuente primaria: Element84 Earth Search (CORS nativo, sin proxy, índice global S2 en AWS)
+    // Fallback:        Copernicus STAC vía corsproxy.io
+    // Último recurso:  Mostrar botones con fechas estimadas por ciclo de revisita (5 días)
+    function buscarFechasSentinel(lat, lng, fechaFoco, tipo) {
+      var delta = 0.15;
+      var bbox = (lng - delta) + ',' + (lat - delta) + ',' + (lng + delta) + ',' + (lat + delta);
+
+      var desde = addDays(fechaFoco, -20);
+      var hasta = addDays(fechaFoco, 8);
+      var ahora = new Date().toISOString().split('T')[0];
+      if (hasta > ahora) hasta = ahora;
+
+      document.getElementById('fechas-sentinel-btns').innerHTML =
+        '<div class="nota">Buscando imágenes disponibles...</div>';
+
+      // ── Fuente 1: Element84 Earth Search — CORS nativo, no necesita proxy ──
+      var urlElement84 = 'https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items' +
+        '?bbox=' + bbox +
+        '&datetime=' + desde + 'T00:00:00Z/' + hasta + 'T23:59:59Z' +
+        '&limit=30';
+
+      fetch(urlElement84)
+        .then(function(r) {
+          if (!r.ok) throw new Error('Element84 HTTP ' + r.status);
+          return r.json();
+        })
+        .then(function(data) {
+          if (!data.features || data.features.length === 0) throw new Error('sin resultados');
+          console.log('✓ Fechas obtenidas de Element84 Earth Search');
+          procesarFeatures(data.features, lat, lng, fechaFoco, tipo);
+        })
+        .catch(function(e1) {
+          console.log('Element84 falló (' + e1.message + '), intentando Copernicus STAC...');
+
+          // ── Fuente 2: Copernicus STAC vía corsproxy.io ──────────────────────
+          var urlCopernicus = 'https://catalogue.dataspace.copernicus.eu/stac/collections/SENTINEL-2/items' +
+            '?bbox=' + bbox +
+            '&datetime=' + desde + 'T00:00:00Z/' + hasta + 'T23:59:59Z' +
+            '&limit=30&sortby=datetime';
+
+          fetch('https://corsproxy.io/?url=' + encodeURIComponent(urlCopernicus))
+            .then(function(r) {
+              if (!r.ok) throw new Error('Copernicus HTTP ' + r.status);
+              return r.json();
+            })
+            .then(function(data) {
+              if (!data.features || data.features.length === 0) throw new Error('sin resultados');
+              console.log('✓ Fechas obtenidas de Copernicus STAC vía proxy');
+              procesarFeatures(data.features, lat, lng, fechaFoco, tipo);
+            })
+            .catch(function(e2) {
+              console.log('Copernicus también falló (' + e2.message + '), usando fechas estimadas.');
+              usarFechasEstimadas(lat, lng, fechaFoco, tipo);
+            });
+        });
+    }
+
+    // ── Procesar features STAC (mismo formato Element84 y Copernicus) ─────────
+    function procesarFeatures(features, lat, lng, fechaFoco, tipo) {
+      var fechasVistas = {};
+      var todas = [];
+
+      features.forEach(function(f) {
+        // La fecha viene en properties.datetime (ISO) — es la fuente más confiable
+        var fechaReal = (f.properties.datetime || '').split('T')[0];
+
+        // Fallback: extraer del ID si datetime no está presente
+        if (!fechaReal) {
+          var match = (f.id || '').match(/(\d{8})T\d{6}/);
+          if (match) {
+            var raw = match[1];
+            fechaReal = raw.slice(0,4) + '-' + raw.slice(4,6) + '-' + raw.slice(6,8);
+          }
+        }
+
+        var nubes = Math.round(
+          f.properties['eo:cloud_cover'] ||
+          f.properties['cloudcover'] ||
+          0
+        );
+
+        if (fechaReal && !fechasVistas[fechaReal]) {
+          fechasVistas[fechaReal] = true;
+          todas.push({ fecha: fechaReal, nubes: nubes });
+        }
+      });
+
+      if (todas.length === 0) {
+        usarFechasEstimadas(lat, lng, fechaFoco, tipo);
+        return;
+      }
+
+      todas.sort(function(a, b) { return a.fecha.localeCompare(b.fecha); });
+      seleccionarABC(todas, lat, lng, fechaFoco, tipo);
+    }
+
+    // ── Último recurso: fechas estimadas por ciclo de revisita de 5 días ─────
+    function usarFechasEstimadas(lat, lng, fechaFoco, tipo) {
+      console.log('Usando fechas estimadas (ciclo 5 días)');
+      var todas = [];
+      // Sentinel-2 tiene revisita ~5 días; generamos candidatos en ±20 días
+      for (var d = -20; d <= 8; d += 5) {
+        var f = addDays(fechaFoco, d);
+        if (f <= new Date().toISOString().split('T')[0]) {
+          todas.push({ fecha: f, nubes: null }); // null = estimado
+        }
+      }
+      seleccionarABC(todas, lat, lng, fechaFoco, tipo);
+    }
+
+    // ── Lógica de selección A/B/C compartida ──────────────────────────────────
+    function seleccionarABC(todas, lat, lng, fechaFoco, tipo) {
+      // B = imagen más cercana al foco
+      var idxB = 0, minDiff = Infinity;
+      todas.forEach(function(item, i) {
+        var diff = Math.abs(diffDays(item.fecha, fechaFoco));
+        if (diff < minDiff) { minDiff = diff; idxB = i; }
+      });
+      var imgB = todas[idxB];
+
+      // A = imagen anterior más cercana a B, dentro de 6 días
+      var imgA = null;
+      for (var i = idxB - 1; i >= 0; i--) {
+        if (diffDays(imgB.fecha, todas[i].fecha) <= 6) { imgA = todas[i]; break; }
+      }
+
+      // C = imagen posterior más cercana a B, dentro de 6 días
+      var imgC = null;
+      var hoyStr = new Date().toISOString().split('T')[0];
+      for (var j = idxB + 1; j < todas.length; j++) {
+        if (diffDays(todas[j].fecha, imgB.fecha) <= 6 && todas[j].fecha <= hoyStr) {
+          imgC = todas[j]; break;
+        }
+      }
+
+      var seleccion = [];
+      if (imgA) seleccion.push({ item: imgA, rol: 'A' });
+      seleccion.push({ item: imgB, rol: 'B' });
+      if (imgC) seleccion.push({ item: imgC, rol: 'C' });
+
+      renderizarBotonesFechas(seleccion, lat, lng, fechaFoco, tipo, imgB);
+    }
+
+    // ── Sentinel: punto de entrada desde el popup ─────────────────────────────
+    function verSentinel(lat, lng, fechaFoco, tipo) {
+      sentinelParams = { lat: lat, lng: lng, fechaFoco: fechaFoco, tipo: tipo };
+      primeraVezSentinel = true;
+      mapa.closePopup();
+
+      document.getElementById('sentinel-tipo-txt').textContent =
+        tipo === 'swir' ? '🔴 Sentinel SWIR' : '🛰 Sentinel Color';
+      document.getElementById('sentinel-panel').classList.add('visible');
+      buscarFechasSentinel(lat, lng, fechaFoco, tipo);
+    }
+
+    window.verSentinel = verSentinel;
+    window.cargarCapaSentinel = cargarCapaSentinel;
+
+    // ── Algoritmo punto-en-polígono ───────────────────────────────────────────
     function pointInPolygon(lat, lng, polygon) {
-      var x = lng, y = lat;
-      var inside = false;
+      var x = lng, y = lat, inside = false;
       for (var i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
         var xi = polygon[i][0], yi = polygon[i][1];
         var xj = polygon[j][0], yj = polygon[j][1];
-        if (((yi > y) != (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) {
+        if (((yi > y) != (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi))
           inside = !inside;
-        }
       }
       return inside;
     }
@@ -136,75 +688,145 @@
       return false;
     }
 
+    // ── Estilos de íconos ─────────────────────────────────────────────────────
+    function colorPorConfianza(conf) {
+      if (conf === 'h') return '#ff4500';
+      if (conf === 'n') return '#ffaa00';
+      return 'rgba(200,200,200,0.6)';
+    }
+
+    function tamanioPorFRP(frp) {
+      if (frp > 100) return 28;
+      if (frp > 50)  return 22;
+      if (frp > 20)  return 17;
+      if (frp > 10)  return 13;
+      return 10;
+    }
+
+    function etiquetaConf(conf) {
+      if (conf === 'h') return '<span class="conf-alta">Alta</span>';
+      if (conf === 'n') return '<span class="conf-nominal">Nominal</span>';
+      return '<span class="conf-baja">Baja</span>';
+    }
+
+    function crearIcono(frp, conf) {
+      var size = tamanioPorFRP(frp);
+      var color = colorPorConfianza(conf);
+      var fontSize = Math.round(size * 0.85);
+      return L.divIcon({
+        className: '',
+        html: '<div class="icono-fuego" style="width:' + size + 'px;height:' + size + 'px;background:' + color + '22;border-color:' + color + ';font-size:' + fontSize + 'px;">🔥</div>',
+        iconSize: [size, size],
+        iconAnchor: [size/2, size/2]
+      });
+    }
+
+    // ── Datos NASA FIRMS ──────────────────────────────────────────────────────
     var API_KEY = 'aadd078296d892e986dd7e921e040ce7';
-    var urlNOAA20 = 'https://firms.modaps.eosdis.nasa.gov/api/area/csv/'
-                 + API_KEY
-                 + '/VIIRS_NOAA20_NRT/-73,-55,-53,-22/2';
+    var todosLosfocos = [];
+    var geojsonGlobal = null;
+    var capaFocos = L.layerGroup().addTo(mapa);
 
-    var urlNOAA21 = 'https://firms.modaps.eosdis.nasa.gov/api/area/csv/'
-                 + API_KEY
-                 + '/VIIRS_NOAA21_NRT/-73,-55,-53,-22/2';
+    function cargarDatos() {
+      mapa.setView([-38, -63], 4);
+      cerrarSentinel();
 
-    Promise.all([
-      fetch('argentina.geojson').then(function(r) { return r.json(); }),
-      fetch(urlNOAA20).then(function(r) { return r.text(); }),
-      fetch(urlNOAA21).then(function(r) { return r.text(); })
-    ])
-    .then(function(resultados) {
-      var geojson = resultados[0];
-      var csv = resultados[1] + '\n' + resultados[2].split('\n').slice(1).join('\n');
+      var fechaElegida = document.getElementById('fecha-especifica').value;
+      var dias = 2;
+      var sufijo = '';
 
-      document.getElementById('loading').style.display = 'none';
+      if (fechaElegida) {
+        dias = 1;
+        sufijo = '/' + fechaElegida;
+      }
 
-      L.geoJSON(geojson, {
-        style: { color: '#ffffff', weight: 1.5, fillOpacity: 0 }
-      }).addTo(mapa);
+      document.getElementById('loading').style.display = 'block';
+      todosLosfocos = [];
 
-      var lineas = csv.trim().split('\n');
-      lineas.shift();
+      var base = 'https://firms.modaps.eosdis.nasa.gov/api/area/csv/' + API_KEY;
+      var bbox = '/-73,-55,-53,-22/';
+      var urls = [
+        base + '/VIIRS_NOAA20_NRT' + bbox + dias + sufijo,
+        base + '/VIIRS_NOAA21_NRT' + bbox + dias + sufijo
+      ];
 
-      var contadorFocos = 0;
+      var promesas = geojsonGlobal
+        ? [ Promise.resolve(geojsonGlobal), fetch(urls[0]).then(function(r){ return r.text(); }), fetch(urls[1]).then(function(r){ return r.text(); }) ]
+        : [ fetch('argentina.geojson').then(function(r){ return r.json(); }), fetch(urls[0]).then(function(r){ return r.text(); }), fetch(urls[1]).then(function(r){ return r.text(); }) ];
 
-      lineas.forEach(function(linea) {
-        var columnas = linea.split(',');
-        var lat = parseFloat(columnas[0]);
-        var lng = parseFloat(columnas[1]);
-        var brillo = parseFloat(columnas[2]);
-        var fecha = columnas[5] || '';
-        var hora = columnas[6] || '';
-        var frp = parseFloat(columnas[12]) || 0;
+      Promise.all(promesas)
+        .then(function(res) {
+          geojsonGlobal = res[0];
+          var csvCombinado = res[1] + '\n' + res[2].split('\n').slice(1).join('\n');
+          var lineas = csvCombinado.trim().split('\n');
+          lineas.shift();
 
-        if (!isNaN(lat) && !isNaN(lng) && frp > 10 && dentroDeArgentina(lat, lng, geojson)) {
-          contadorFocos++;
+          lineas.forEach(function(linea) {
+            var c = linea.split(',');
+            var lat  = parseFloat(c[0]);
+            var lng  = parseFloat(c[1]);
+            var frp  = parseFloat(c[12]) || 0;
+            var conf = c[9] ? c[9].trim().toLowerCase() : 'l';
+            var fecha = c[5] || '';
+            var hora  = c[6] || '';
+            var sat   = c[7] || '';
 
-          var radio = brillo > 350 ? 10 : brillo > 320 ? 7 : 5;
-          var color = brillo > 350 ? '#8B0000' : brillo > 320 ? '#E24B4A' : '#FFA500';
-          var intensidad = brillo > 350 ? 'Alta' : brillo > 320 ? 'Media' : 'Baja';
+            if (!isNaN(lat) && !isNaN(lng) && dentroDeArgentina(lat, lng, geojsonGlobal)) {
+              todosLosfocos.push({ lat: lat, lng: lng, frp: frp, conf: conf, fecha: fecha, hora: hora, sat: sat });
+            }
+          });
 
-          L.circleMarker([lat, lng], {
-            radius: radio,
-            fillColor: color,
-            color: '#fff',
-            weight: 1,
-            fillOpacity: 0.85
-          })
-          .bindPopup(
-            '<b>Foco activo</b><br>' +
-            'Intensidad: <b>' + intensidad + '</b><br>' +
-            'FRP: <b>' + frp + ' MW</b><br>' +
-            'Fecha: ' + fecha + ' ' + hora + '<br>' +
-            'Fuente: VIIRS · NASA FIRMS'
-          )
-          .addTo(mapa);
+          document.getElementById('loading').style.display = 'none';
+          aplicarFiltros();
+        })
+        .catch(function(e) {
+          document.getElementById('loading').textContent = 'Error al cargar datos.';
+          console.log(e);
+        });
+    }
+
+    function aplicarFiltros() {
+      var confAlta    = document.getElementById('conf-alta').checked;
+      var confNominal = document.getElementById('conf-nominal').checked;
+      var confBaja    = document.getElementById('conf-baja').checked;
+      var frpMin      = parseFloat(document.getElementById('frp-slider').value) || 0;
+
+      capaFocos.clearLayers();
+      var contador = 0;
+
+      todosLosfocos.forEach(function(f) {
+        var mostrar = false;
+        if (f.conf === 'h' && confAlta)    mostrar = true;
+        if (f.conf === 'n' && confNominal) mostrar = true;
+        if (f.conf === 'l' && confBaja)    mostrar = true;
+        if (f.frp < frpMin) mostrar = false;
+
+        if (mostrar) {
+          contador++;
+          var marker = L.marker([f.lat, f.lng], { icon: crearIcono(f.frp, f.conf) });
+          var lat = f.lat, lng = f.lng, fecha = f.fecha;
+
+          marker.bindPopup(
+            '<div class="popup-titulo">🔥 Foco activo</div>' +
+            '<div class="popup-fila"><span class="popup-key">Confianza</span><span class="popup-val">' + etiquetaConf(f.conf) + '</span></div>' +
+            '<div class="popup-fila"><span class="popup-key">FRP</span><span class="popup-val">' + f.frp.toFixed(1) + ' MW</span></div>' +
+            '<div class="popup-fila"><span class="popup-key">Satélite</span><span class="popup-val">' + f.sat + '</span></div>' +
+            '<div class="popup-fila"><span class="popup-key">Fecha</span><span class="popup-val">' + f.fecha + ' ' + f.hora + ' UTC</span></div>' +
+            '<div class="popup-fila"><span class="popup-key">Latitud</span><span class="popup-val">' + f.lat.toFixed(5) + '</span></div>' +
+            '<div class="popup-fila"><span class="popup-key">Longitud</span><span class="popup-val">' + f.lng.toFixed(5) + '</span></div>' +
+            '<button class="btn-popup" style="background:#ff4500;color:white;margin-top:10px;" onclick="verSentinel(' + lat + ',' + lng + ',\'' + fecha + '\',\'rgb\')">🛰 Ver imagen satelital</button>' +
+            '<button class="btn-popup" style="background:#1a1a1a;color:#ff6b35;border:1px solid #ff6b35;" onclick="verSentinel(' + lat + ',' + lng + ',\'' + fecha + '\',\'swir\')">🔴 Ver SWIR · detección fuego</button>'
+          );
+
+          capaFocos.addLayer(marker);
         }
       });
 
-      document.getElementById('num-focos').textContent = contadorFocos;
-    })
-    .catch(function(error) {
-      document.getElementById('loading').textContent = 'Error al cargar datos.';
-      console.log('Error:', error);
-    });
+      document.getElementById('num-focos').textContent = contador;
+      document.getElementById('panel-filtros').classList.remove('visible');
+    }
+
+    cargarDatos();
   </script>
 
 </body>
