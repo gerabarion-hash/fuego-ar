@@ -285,59 +285,48 @@
       font-family: 'Barlow', sans-serif;
     }
 
-    /* ── PANEL COMPARTIR ──────────────────────────────────────────────────── */
-    #panel-compartir {
-      position: absolute;
-      top: 62px; right: 10px;
-      width: 260px;
-      background: rgba(18,18,18,0.97);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,69,0,0.4);
-      border-radius: 10px;
-      z-index: 1000;
-      padding: 14px 16px;
-      display: none;
-    }
-    #panel-compartir.visible { display: block; }
+    /* (btn-rapido eliminado) */
 
-    .compartir-titulo {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 13px; font-weight: 700;
-      color: #ff6b35; margin-bottom: 4px;
+    /* ── COMPARTIR — compacto ─────────────────────────────────────────────── */
+    .popup-share-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255,255,255,0.06);
     }
-    .compartir-coords {
-      font-size: 11px; color: rgba(255,255,255,0.35);
-      margin-bottom: 12px; font-family: monospace;
+    .popup-share-label {
+      font-size: 10px;
+      color: rgba(255,255,255,0.3);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      flex-shrink: 0;
     }
-    .compartir-btns { display: flex; flex-direction: column; gap: 7px; }
-    .btn-compartir {
-      display: flex; align-items: center; gap: 10px;
-      padding: 9px 12px;
-      border-radius: 7px;
-      font-size: 13px; font-weight: 600;
-      font-family: 'Barlow', sans-serif;
-      cursor: pointer; border: none;
-      transition: opacity .15s;
+    .share-icons { display: flex; gap: 6px; }
+    .share-icon-btn {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px;
+      transition: transform .15s, opacity .15s;
       text-decoration: none;
+      flex-shrink: 0;
     }
-    .btn-compartir:hover { opacity: .85; }
-    .btn-compartir-wa  { background: #25D366; color: white; }
-    .btn-compartir-ig  { background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045); color: white; }
-    .btn-compartir-copy { background: rgba(255,255,255,0.1); color: #e8e8e8; border: 1px solid rgba(255,255,255,0.15); }
-    .compartir-icon { font-size: 18px; line-height: 1; }
-    #btn-cerrar-compartir {
-      position: absolute; top: 10px; right: 12px;
-      background: none; border: none;
-      color: rgba(255,255,255,0.3); font-size: 16px;
-      cursor: pointer; line-height: 1;
-    }
-    #btn-cerrar-compartir:hover { color: #E24B4A; }
-    .copy-feedback {
-      font-size: 11px; color: #25D366;
-      text-align: center; margin-top: 6px;
+    .share-icon-btn:hover { transform: scale(1.15); opacity: .9; }
+    .share-fb   { background: #1877F2; }
+    .share-wa   { background: #25D366; }
+    .share-ig   { background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045); }
+    .share-link { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); }
+
+    .share-copied {
+      font-size: 10px; color: #25D366;
       opacity: 0; transition: opacity .3s;
+      margin-left: 2px;
     }
-    .copy-feedback.visible { opacity: 1; }
+    .share-copied.visible { opacity: 1; }
 
     /* ── FAQ MODAL ────────────────────────────────────────────────────────── */
     #faq-overlay {
@@ -478,34 +467,17 @@
       <div class="frp-tag">&gt;100 MW<br><span style="opacity:.5">incendio severo</span></div>
     </div>
 
-    <div class="filtro-titulo">Día específico</div>
+    <div class="filtro-titulo">Fecha específica</div>
     <div class="fecha-row">
-      <label>Dejá vacío para ver las últimas 48hs</label>
+      <label>Seleccioná un día para ver sus focos. Sin selección se cargan los focos recientes.</label>
       <input type="date" id="fecha-especifica">
-      <div class="nota">Máximo 7 días atrás · NASA FIRMS (VIIRS NOAA-20 y NOAA-21)</div>
+      <div class="nota">NASA FIRMS · VIIRS NOAA-20 y NOAA-21</div>
     </div>
 
     <button id="btn-aplicar" onclick="cargarDatos()">Aplicar filtros</button>
   </div>
 
-  <!-- ── PANEL COMPARTIR ───────────────────────────────────────────────────── -->
-  <div id="panel-compartir">
-    <button id="btn-cerrar-compartir" onclick="cerrarCompartir()">✕</button>
-    <div class="compartir-titulo">📍 Compartir foco activo</div>
-    <div class="compartir-coords" id="compartir-coords">—</div>
-    <div class="compartir-btns">
-      <a id="btn-wa" class="btn-compartir btn-compartir-wa" href="#" target="_blank">
-        <span class="compartir-icon">📲</span>Compartir por WhatsApp
-      </a>
-      <button class="btn-compartir btn-compartir-ig" onclick="copiarParaInstagram()">
-        <span class="compartir-icon">📸</span>Copiar para Instagram
-      </button>
-      <button class="btn-compartir btn-compartir-copy" onclick="copiarEnlace()">
-        <span class="compartir-icon">🔗</span>Copiar enlace del mapa
-      </button>
-    </div>
-    <div class="copy-feedback" id="copy-feedback">✓ Copiado al portapapeles</div>
-  </div>
+  <!-- compartir ahora va inline en el popup -->
 
   <!-- ── PANEL SENTINEL ────────────────────────────────────────────────────── -->
   <div id="sentinel-panel">
@@ -552,7 +524,7 @@
         </div>
         <div class="faq-respuesta">
           Los datos provienen de los satélites <em>VIIRS a bordo de NOAA-20 y NOAA-21</em>, operados por NASA. Cada satélite sobrevuela Argentina <strong>aproximadamente 2 veces por día</strong> (una pasada de día y una de noche). Los datos se publican en la plataforma NASA FIRMS con un retraso de <strong>3 a 6 horas</strong> desde el pasaje del satélite.<br><br>
-          La app carga automáticamente los <strong>últimos 2 días</strong> al abrir. Podés usar el filtro de fecha para ver un día específico (máximo 7 días hacia atrás).
+          La app carga por defecto los focos más recientes. Podés elegir una fecha específica con el calendario para ver incendios de días anteriores.
         </div>
       </div>
 
@@ -646,7 +618,7 @@
     var focosVisibles = true;
     var primeraVezSentinel = true;
     var INSTANCE_ID = 'c87c1637-7fee-40c3-96fa-f9037b487389';
-    var focoActualCompartir = null;
+    var focoActualCompartir = null; // legacy — se puede quitar en próxima limpieza
 
     // ── Helpers de fecha ──────────────────────────────────────────────────────
     function formatFecha(iso) {
@@ -662,11 +634,43 @@
       return Math.round((new Date(a) - new Date(b)) / 86400000);
     }
 
+    // ── Botones rápidos de fecha ───────────────────────────────────────────
+    var diasCarga = 2; // carga últimos 2 días por defecto — sin mostrarlo en la UI
+
+    // ── Compartir — funciones inline ──────────────────────────────────────
+    function compartirWA(lat, lng, frp, fecha) {
+      var url = 'https://gerabarion-hash.github.io/fuego-ar/?lat=' + lat.toFixed(4) + '&lng=' + lng.toFixed(4) + '&z=12';
+      var txt = '🔥 Foco activo NASA · ' + lat.toFixed(3) + ', ' + lng.toFixed(3) + ' · FRP ' + frp.toFixed(0) + ' MW · ' + fecha + ' · ' + url + ' via FuegoAR';
+      window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank');
+    }
+    function compartirFB(lat, lng) {
+      var url = 'https://gerabarion-hash.github.io/fuego-ar/?lat=' + lat.toFixed(4) + '&lng=' + lng.toFixed(4) + '&z=12';
+      window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url), '_blank');
+    }
+    function compartirIG(lat, lng, frp, fecha, btnEl) {
+      var url = 'https://gerabarion-hash.github.io/fuego-ar/?lat=' + lat.toFixed(4) + '&lng=' + lng.toFixed(4) + '&z=12';
+      var txt = '🔥 Foco activo detectado por satélite NASA\n📍 ' + lat.toFixed(3) + ', ' + lng.toFixed(3) + '\n⚡ ' + frp.toFixed(0) + ' MW · ' + fecha + '\n🛰 FuegoAR — ' + url + '\n#incendio #argentina #satelite #NASA';
+      navigator.clipboard.writeText(txt).then(function() {
+        var fb = btnEl.closest('.popup-share-row').querySelector('.share-copied');
+        if (fb) { fb.textContent = '✓ Copiado'; fb.classList.add('visible'); setTimeout(function(){ fb.classList.remove('visible'); }, 2500); }
+      });
+    }
+    function compartirLink(lat, lng, btnEl) {
+      var url = 'https://gerabarion-hash.github.io/fuego-ar/?lat=' + lat.toFixed(4) + '&lng=' + lng.toFixed(4) + '&z=12';
+      navigator.clipboard.writeText(url).then(function() {
+        var fb = btnEl.closest('.popup-share-row').querySelector('.share-copied');
+        if (fb) { fb.textContent = '✓ Enlace copiado'; fb.classList.add('visible'); setTimeout(function(){ fb.classList.remove('visible'); }, 2500); }
+      });
+    }
+    window.compartirWA = compartirWA;
+    window.compartirFB = compartirFB;
+    window.compartirIG = compartirIG;
+    window.compartirLink = compartirLink;
+
     // ── FAQ ───────────────────────────────────────────────────────────────────
     function toggleFaq() {
       document.getElementById('faq-overlay').classList.toggle('visible');
       document.getElementById('panel-filtros').classList.remove('visible');
-      document.getElementById('panel-compartir').classList.remove('visible');
     }
     function cerrarFaqOverlay(e) {
       if (e.target === document.getElementById('faq-overlay')) toggleFaq();
@@ -681,7 +685,6 @@
     // ── UI general ────────────────────────────────────────────────────────────
     function toggleFiltros() {
       document.getElementById('panel-filtros').classList.toggle('visible');
-      document.getElementById('panel-compartir').classList.remove('visible');
       document.getElementById('faq-overlay').classList.remove('visible');
     }
     function toggleFocos() {
@@ -697,65 +700,6 @@
         btn.classList.add('oculto');
       }
     }
-
-    // ── Compartir ─────────────────────────────────────────────────────────────
-    function abrirCompartir(lat, lng, frp, fecha) {
-      focoActualCompartir = { lat: lat, lng: lng, frp: frp, fecha: fecha };
-      var panel = document.getElementById('panel-compartir');
-
-      document.getElementById('compartir-coords').textContent =
-        lat.toFixed(4) + ', ' + lng.toFixed(4) + ' · FRP ' + frp.toFixed(0) + ' MW · ' + fecha;
-
-      var url = 'https://gerabarion-hash.github.io/fuego-ar/?lat=' + lat.toFixed(4) + '&lng=' + lng.toFixed(4) + '&z=12';
-      var texto = '🔥 Foco activo detectado por satélite NASA cerca de lat ' +
-        lat.toFixed(3) + ', lon ' + lng.toFixed(3) +
-        ' | FRP: ' + frp.toFixed(0) + ' MW | ' + fecha +
-        ' | Ver en mapa: ' + url + ' via FuegoAR 🛰';
-
-      document.getElementById('btn-wa').href =
-        'https://wa.me/?text=' + encodeURIComponent(texto);
-
-      panel.classList.add('visible');
-      document.getElementById('copy-feedback').classList.remove('visible');
-      mapa.closePopup();
-    }
-
-    function cerrarCompartir() {
-      document.getElementById('panel-compartir').classList.remove('visible');
-    }
-
-    function copiarParaInstagram() {
-      var f = focoActualCompartir;
-      if (!f) return;
-      var url = 'https://gerabarion-hash.github.io/fuego-ar/?lat=' + f.lat.toFixed(4) + '&lng=' + f.lng.toFixed(4) + '&z=12';
-      var texto = '🔥 Foco activo detectado por satélite NASA\n' +
-        '📍 ' + f.lat.toFixed(3) + ', ' + f.lng.toFixed(3) + '\n' +
-        '⚡ Potencia: ' + f.frp.toFixed(0) + ' MW\n' +
-        '📅 ' + f.fecha + '\n\n' +
-        '🛰 Monitoreo satelital en tiempo real · FuegoAR\n' +
-        url + '\n\n' +
-        '#incendio #argentina #satelite #NASA #VIIRS #medioambiente #fuegoAR';
-      navigator.clipboard.writeText(texto).then(function() {
-        var fb = document.getElementById('copy-feedback');
-        fb.textContent = '✓ Texto copiado — pegalo en Instagram';
-        fb.classList.add('visible');
-        setTimeout(function() { fb.classList.remove('visible'); }, 3000);
-      });
-    }
-
-    function copiarEnlace() {
-      var f = focoActualCompartir;
-      if (!f) return;
-      var url = 'https://gerabarion-hash.github.io/fuego-ar/?lat=' + f.lat.toFixed(4) + '&lng=' + f.lng.toFixed(4) + '&z=12';
-      navigator.clipboard.writeText(url).then(function() {
-        var fb = document.getElementById('copy-feedback');
-        fb.textContent = '✓ Enlace copiado al portapapeles';
-        fb.classList.add('visible');
-        setTimeout(function() { fb.classList.remove('visible'); }, 2500);
-      });
-    }
-
-    window.abrirCompartir = abrirCompartir;
 
     // ── Sentinel: cerrar ──────────────────────────────────────────────────────
     function cerrarSentinel() {
@@ -982,10 +926,9 @@
     function cargarDatos() {
       mapa.setView([-38, -63], 4);
       cerrarSentinel();
-      cerrarCompartir();
 
       var fechaElegida = document.getElementById('fecha-especifica').value;
-      var dias = 2, sufijo = '';
+      var dias = diasCarga, sufijo = '';
       if (fechaElegida) { dias = 1; sufijo = '/' + fechaElegida; }
 
       document.getElementById('loading').style.display = 'block';
@@ -1052,11 +995,20 @@
             '<div class="popup-fila"><span class="popup-key">Confianza</span><span class="popup-val">' + etiquetaConf(f.conf) + '</span></div>' +
             '<div class="popup-fila"><span class="popup-key">FRP</span><span class="popup-val">' + f.frp.toFixed(1) + ' MW</span></div>' +
             '<div class="popup-fila"><span class="popup-key">Satélite</span><span class="popup-val">' + f.sat + '</span></div>' +
-            '<div class="popup-fila"><span class="popup-key">Fecha</span><span class="popup-val">' + f.fecha + ' ' + f.hora + ' UTC</span></div>' +
+            '<div class="popup-fila"><span class="popup-key">Fecha / Hora</span><span class="popup-val">' + f.fecha + ' <span style="color:#ff6b35">·</span> ' + f.hora.replace(/:/g, '<span style="color:#ff6b35">:</span>') + ' UTC</span></div>' +
             '<div class="popup-fila"><span class="popup-key">Coordenadas</span><span class="popup-val">' + f.lat.toFixed(4) + ', ' + f.lng.toFixed(4) + '</span></div>' +
             '<button class="btn-popup" style="background:#ff4500;color:white;margin-top:10px;" onclick="verSentinel(' + lat + ',' + lng + ',\'' + fecha + '\',\'rgb\')">🛰 Ver imagen satelital</button>' +
             '<button class="btn-popup" style="background:#1a1a1a;color:#ff6b35;border:1px solid #ff6b35;" onclick="verSentinel(' + lat + ',' + lng + ',\'' + fecha + '\',\'swir\')">🔴 Ver SWIR · detección fuego</button>' +
-            '<button class="btn-popup" style="background:rgba(37,211,102,0.15);color:#25D366;border:1px solid rgba(37,211,102,0.3);" onclick="abrirCompartir(' + lat + ',' + lng + ',' + frp + ',\'' + fecha + '\')">📲 Compartir este foco</button>'
+            '<div class="popup-share-row">' +
+              '<span class="popup-share-label">Compartir</span>' +
+              '<div class="share-icons">' +
+                '<button class="share-icon-btn share-fb" title="Facebook" onclick="compartirFB(' + lat + ',' + lng + ')">f</button>' +
+                '<button class="share-icon-btn share-wa" title="WhatsApp" onclick="compartirWA(' + lat + ',' + lng + ',' + frp + ',\'' + fecha + '\')">&#128172;</button>' +
+                '<button class="share-icon-btn share-ig" title="Instagram (copiar texto)" onclick="compartirIG(' + lat + ',' + lng + ',' + frp + ',\'' + fecha + '\',this)">&#127916;</button>' +
+                '<button class="share-icon-btn share-link" title="Copiar enlace" onclick="compartirLink(' + lat + ',' + lng + ',this)">&#128279;</button>' +
+              '</div>' +
+              '<span class="share-copied"></span>' +
+            '</div>'
           );
 
           capaFocos.addLayer(marker);
