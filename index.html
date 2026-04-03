@@ -505,12 +505,13 @@
       border: 1px solid rgba(255,69,0,0.5);
       border-radius: 10px;
       padding: 12px 16px;
-      z-index: 1000;
+      z-index: 1500;
       display: none;
       align-items: center;
       gap: 14px;
       min-width: 360px;
       max-width: 90vw;
+      pointer-events: all;
     }
     #slider-panel.visible { display: flex; }
 
@@ -521,25 +522,30 @@
     }
     .slider-fechas { font-size: 11px; color: rgba(255,255,255,0.4); }
 
-    .slider-toggle-btns { display: flex; gap: 5px; margin-left: auto; }
+    .slider-toggle-btns { display: flex; gap: 5px; }
     .btn-slider-tipo {
-      padding: 4px 10px;
+      padding: 5px 12px;
       border-radius: 5px;
-      font-size: 11px; font-weight: 600;
+      font-size: 12px; font-weight: 600;
       font-family: 'Barlow', sans-serif;
-      cursor: pointer; border: 1px solid rgba(255,255,255,0.15);
-      background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.6);
+      cursor: pointer !important;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7);
       transition: all .15s;
+      pointer-events: all !important;
     }
+    .btn-slider-tipo:hover { background: rgba(255,255,255,0.18); color: white; border-color: rgba(255,255,255,0.4); }
     .btn-slider-tipo.activo { background: #ff4500; border-color: #ff4500; color: white; }
 
     #btn-cerrar-slider {
       background: none; border: 1px solid rgba(255,75,74,0.4);
-      color: #E24B4A; padding: 3px 10px;
-      border-radius: 4px; font-size: 11px;
-      cursor: pointer; font-family: 'Barlow', sans-serif;
-      font-weight: 600; white-space: nowrap;
+      color: #E24B4A; padding: 4px 10px;
+      border-radius: 4px; font-size: 13px;
+      cursor: pointer !important; font-family: 'Barlow', sans-serif;
+      font-weight: 700; white-space: nowrap;
+      pointer-events: all !important;
     }
+    #btn-cerrar-slider:hover { background: rgba(226,75,74,0.15); }
 
     /* ── SIDE BY SIDE DIVIDER ────────────────────────────────────────────── */
     .leaflet-sbs-range {
@@ -611,17 +617,15 @@
       <div class="slider-caso-nombre" id="slider-nombre">—</div>
       <div class="slider-fechas" id="slider-fechas"></div>
     </div>
-    <!-- Toggles Durante / Post -->
     <div class="slider-toggle-btns">
       <button class="btn-slider-tipo" id="btn-dur" onclick="toggleCapa('dur')">🔥 Durante</button>
       <button class="btn-slider-tipo" id="btn-post" onclick="toggleCapa('post')">📍 Post-fuego</button>
     </div>
-    <!-- RGB / SWIR -->
-    <div class="slider-toggle-btns">
+    <div class="slider-toggle-btns" style="border-left:1px solid rgba(255,255,255,0.1);padding-left:10px;">
       <button class="btn-slider-tipo activo" id="btn-rgb" onclick="cambiarTipoSlider('rgb')">RGB</button>
       <button class="btn-slider-tipo" id="btn-swir" onclick="cambiarTipoSlider('swir')">SWIR</button>
     </div>
-    <button id="btn-cerrar-slider" onclick="cerrarSlider()">✕ Cerrar</button>
+    <button id="btn-cerrar-slider" onclick="cerrarSlider()" style="cursor:pointer;pointer-events:all;">✕</button>
   </div>
 
   <!-- ── PANEL FILTROS ─────────────────────────────────────────────────────── -->
