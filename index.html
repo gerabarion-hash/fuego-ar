@@ -605,12 +605,18 @@
     </div>
   </div>
 
-  <!-- ── PANEL SLIDER ACTIVO ───────────────────────────────────────────────── -->
+  <!-- ── PANEL CAPAS HISTÓRICAS ACTIVO ────────────────────────────────────── -->
   <div id="slider-panel">
-    <div>
+    <div style="flex:1;min-width:0;">
       <div class="slider-caso-nombre" id="slider-nombre">—</div>
-      <div class="slider-fechas" id="slider-fechas">← antes &nbsp;|&nbsp; después →</div>
+      <div class="slider-fechas" id="slider-fechas"></div>
     </div>
+    <!-- Toggles Durante / Post -->
+    <div class="slider-toggle-btns">
+      <button class="btn-slider-tipo" id="btn-dur" onclick="toggleCapa('dur')">🔥 Durante</button>
+      <button class="btn-slider-tipo" id="btn-post" onclick="toggleCapa('post')">📍 Post-fuego</button>
+    </div>
+    <!-- RGB / SWIR -->
     <div class="slider-toggle-btns">
       <button class="btn-slider-tipo activo" id="btn-rgb" onclick="cambiarTipoSlider('rgb')">RGB</button>
       <button class="btn-slider-tipo" id="btn-swir" onclick="cambiarTipoSlider('swir')">SWIR</button>
@@ -1210,36 +1216,33 @@
       manzanos: {
         nombre: 'Los Manzanos — PN Nahuel Huapi',
         lat: -41.497, lng: -71.661, zoom: 11,
-        pre:    '2024-11-18',
-        dur:    '2025-01-29',
-        post:   '2025-02-13'
+        dur:  '2025-01-29',  // S2B_MSIL2A_20250129T142719
+        post: '2025-02-13'   // S2C_MSIL2A_20250213T142821
       },
       lanin: {
         nombre: 'Lanín / Valle Magdalena',
         lat: -39.553, lng: -71.219, zoom: 11,
-        pre:    '2024-12-25',
-        dur:    '2025-02-01',
-        post:   '2025-02-21'
+        dur:  '2025-02-01',  // S2B_MSIL2A_20250201T143749
+        post: '2025-02-21'   // S2B_MSIL2A_20250221T143749
       },
       madryn: {
         nombre: 'Puerto Madryn — Estepa Chubut',
         lat: -42.305, lng: -65.008, zoom: 12,
-        pre:    '2025-01-03',
-        dur:    '2025-01-30',
-        post:   '2025-02-04'
+        dur:  '2025-01-30',  // S2B_MSIL2A_20250130T135709
+        post: '2025-02-04'   // S2C_MSIL2A_20250204T135731
       },
       alerces: {
         nombre: 'Los Alerces "El Centinela"',
         lat: -42.830, lng: -71.780, zoom: 11,
-        pre:    '2025-11-03',
-        dur:    '2026-01-04',
-        post:   '2026-02-21'
+        dur:  '2026-01-04',  // S2B_MSIL2A_20260104T142709
+        post: '2026-02-21'   // S2C_MSIL2A_20260221T143751
       }
     };
 
-    var sliderControl = null;
-    var sliderLayerIzq = null;
-    var sliderLayerDer = null;
+    var capaDur  = null;  // capa "durante el incendio"
+    var capaPost = null;  // capa "post-fuego"
+    var durActiva  = false;
+    var postActiva = false;
     var casoActual = null;
     var tipoActual = 'rgb';
 
@@ -1251,6 +1254,7 @@
       document.getElementById('faq-overlay').classList.remove('visible');
     }
 
+    // Crea una capa WMS Sentinel-2 con fecha exacta y sin bounds (evita tiles negros)
     function crearCapaSentinelHist(fecha, tipo) {
       var layerName = tipo === 'swir' ? 'SWIR' : 'TRUE_COLOR';
       return L.tileLayer.wms(
@@ -1276,40 +1280,64 @@
       document.getElementById('panel-historico').classList.remove('visible');
       document.getElementById('btn-historico').classList.remove('activo');
 
-      // Zoom al área
       mapa.setView([caso.lat, caso.lng], caso.zoom);
 
-      // Limpiar slider anterior
+      // Limpiar capas anteriores
       cerrarSlider(true);
 
-      // Crear capas pre y post
-      sliderLayerIzq = crearCapaSentinelHist(caso.pre, tipoActual);
-      sliderLayerDer = crearCapaSentinelHist(caso.post, tipoActual);
-
-      sliderLayerIzq.addTo(mapa);
-      sliderLayerDer.addTo(mapa);
-
-      // Crear el control side-by-side
-      if (L.control.sideBySide) {
-        sliderControl = L.control.sideBySide(sliderLayerIzq, sliderLayerDer).addTo(mapa);
-      }
-
-      // Actualizar panel inferior
-      document.getElementById('slider-nombre').textContent = caso.nombre;
-      document.getElementById('slider-fechas').textContent =
-        '← ' + formatFecha(caso.pre) + '  |  ' + formatFecha(caso.post) + ' →';
+      // Resetear estado de botones
+      durActiva  = false;
+      postActiva = false;
+      document.getElementById('btn-dur').classList.remove('activo');
+      document.getElementById('btn-post').classList.remove('activo');
       document.getElementById('btn-rgb').classList.add('activo');
       document.getElementById('btn-swir').classList.remove('activo');
 
+      // Actualizar info del panel
+      document.getElementById('slider-nombre').textContent = caso.nombre;
+      document.getElementById('slider-fechas').textContent =
+        '🔥 Durante: ' + formatFecha(caso.dur) + '  ·  📍 Post: ' + formatFecha(caso.post);
+
       // Marcar card activa
       document.querySelectorAll('.caso-card').forEach(function(c) { c.classList.remove('activo'); });
-      var cards = document.querySelectorAll('.caso-card');
       var idx = Object.keys(CASOS).indexOf(id);
+      var cards = document.querySelectorAll('.caso-card');
       if (cards[idx]) cards[idx].classList.add('activo');
 
       document.getElementById('slider-panel').classList.add('visible');
     }
 
+    // Toggle individual de cada capa (durante / post)
+    function toggleCapa(cual) {
+      var caso = CASOS[casoActual];
+      if (!caso) return;
+
+      if (cual === 'dur') {
+        if (durActiva) {
+          if (capaDur) { mapa.removeLayer(capaDur); capaDur = null; }
+          durActiva = false;
+          document.getElementById('btn-dur').classList.remove('activo');
+        } else {
+          capaDur = crearCapaSentinelHist(caso.dur, tipoActual);
+          capaDur.addTo(mapa);
+          durActiva = true;
+          document.getElementById('btn-dur').classList.add('activo');
+        }
+      } else if (cual === 'post') {
+        if (postActiva) {
+          if (capaPost) { mapa.removeLayer(capaPost); capaPost = null; }
+          postActiva = false;
+          document.getElementById('btn-post').classList.remove('activo');
+        } else {
+          capaPost = crearCapaSentinelHist(caso.post, tipoActual);
+          capaPost.addTo(mapa);
+          postActiva = true;
+          document.getElementById('btn-post').classList.add('activo');
+        }
+      }
+    }
+
+    // Cambiar RGB / SWIR — recrea las capas activas con el nuevo tipo
     function cambiarTipoSlider(tipo) {
       if (!casoActual) return;
       tipoActual = tipo;
@@ -1318,26 +1346,24 @@
       document.getElementById('btn-rgb').classList.toggle('activo', tipo === 'rgb');
       document.getElementById('btn-swir').classList.toggle('activo', tipo === 'swir');
 
-      // Reemplazar capas manteniendo el slider
-      if (sliderLayerIzq) mapa.removeLayer(sliderLayerIzq);
-      if (sliderLayerDer) mapa.removeLayer(sliderLayerDer);
-      if (sliderControl) { sliderControl.remove(); sliderControl = null; }
-
-      sliderLayerIzq = crearCapaSentinelHist(caso.pre, tipo);
-      sliderLayerDer = crearCapaSentinelHist(caso.post, tipo);
-
-      sliderLayerIzq.addTo(mapa);
-      sliderLayerDer.addTo(mapa);
-
-      if (L.control.sideBySide) {
-        sliderControl = L.control.sideBySide(sliderLayerIzq, sliderLayerDer).addTo(mapa);
+      // Recrear solo las capas que estaban activas
+      if (durActiva) {
+        if (capaDur) mapa.removeLayer(capaDur);
+        capaDur = crearCapaSentinelHist(caso.dur, tipo);
+        capaDur.addTo(mapa);
+      }
+      if (postActiva) {
+        if (capaPost) mapa.removeLayer(capaPost);
+        capaPost = crearCapaSentinelHist(caso.post, tipo);
+        capaPost.addTo(mapa);
       }
     }
 
     function cerrarSlider(silencioso) {
-      if (sliderControl) { sliderControl.remove(); sliderControl = null; }
-      if (sliderLayerIzq) { mapa.removeLayer(sliderLayerIzq); sliderLayerIzq = null; }
-      if (sliderLayerDer) { mapa.removeLayer(sliderLayerDer); sliderLayerDer = null; }
+      if (capaDur)  { mapa.removeLayer(capaDur);  capaDur  = null; }
+      if (capaPost) { mapa.removeLayer(capaPost); capaPost = null; }
+      durActiva = false;
+      postActiva = false;
       casoActual = null;
       document.querySelectorAll('.caso-card').forEach(function(c) { c.classList.remove('activo'); });
       if (!silencioso) {
@@ -1350,6 +1376,7 @@
     window.cerrarSlider = cerrarSlider;
     window.cambiarTipoSlider = cambiarTipoSlider;
     window.toggleHistorico = toggleHistorico;
+    window.toggleCapa = toggleCapa;
 
     cargarDatos();
   </script>
