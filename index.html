@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fuego AR — Monitor de Incendios Argentina</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-side-by-side@2.0.0/leaflet-side-by-side.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Barlow', sans-serif; background: #0d0d0d; color: #e8e8e8; }
+    #mapa { height: 100vh; width: 100%; }
+
+    /* ── HEADER ───────────────────────────────────────────────────────────── */
+    #header {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 52px;
+      background: rgba(13,13,13,0.92);
+      backdrop-filter: blur(8px);
+      z-index: 1001;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    #logo {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: #ff4500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+    #logo span { color: #e8e8e8; }
+
+    #contador-header { font-size: 13px; color: rgba(255,255,255,0.5); margin-left: auto; white-space: nowrap; }
+    #contador-header strong { color: #ff6b35; font-size: 15px; }
+
+    #btn-filtros, #btn-toggle-focos, #btn-faq {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #e8e8e8;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: 'Barlow', sans-serif;
+      cursor: pointer;
+      transition: background .2s;
+      white-space: nowrap;
+    }
+    #btn-filtros:hover, #btn-toggle-focos:hover, #btn-faq:hover { background: rgba(255,255,255,0.14); }
+    #btn-toggle-focos.oculto { opacity: 0.4; }
+
+    /* ── PANEL FILTROS ────────────────────────────────────────────────────── */
+    #panel-filtros {
+      position: absolute;
+      top: 62px; left: 10px;
+      width: 288px;
+      background: rgba(18,18,18,0.97);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      z-index: 1000;
+      padding: 16px;
+      display: none;
+    }
+    #panel-filtros.visible { display: block; }
+
+    .filtro-titulo {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 6px;
+      margin-top: 14px;
+    }
+    .filtro-titulo:first-child { margin-top: 0; }
+
+    .filtro-desc {
+      font-size: 11px;
+      color: rgba(255,255,255,0.35);
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 0;
+      cursor: pointer;
+      font-size: 13px;
+      color: #e8e8e8;
+    }
+    .check-row input[type=checkbox] { accent-color: #ff4500; width: 14px; height: 14px; cursor: pointer; }
+    .dot-conf { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+    .frp-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.6);
+    }
+    #frp-valor { color: #ff6b35; font-weight: 600; }
+
+    .frp-escala {
+      display: flex;
+      gap: 4px;
+      margin-top: 6px;
+      margin-bottom: 2px;
+    }
+    .frp-tag {
+      flex: 1;
+      text-align: center;
+      font-size: 10px;
+      padding: 3px 2px;
+      border-radius: 4px;
+      color: rgba(255,255,255,0.5);
+      border: 1px solid rgba(255,255,255,0.1);
+      line-height: 1.3;
+    }
+
+    input[type=range] { width: 100%; accent-color: #ff4500; cursor: pointer; }
+    .fecha-row { display: flex; flex-direction: column; gap: 6px; }
+    .fecha-row label { font-size: 12px; color: rgba(255,255,255,0.5); }
+    .fecha-row input[type=date] {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #e8e8e8;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: 'Barlow', sans-serif;
+      width: 100%;
+      cursor: pointer;
+    }
+    .nota { font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 4px; }
+
+    #btn-aplicar {
+      margin-top: 14px;
+      width: 100%;
+      background: #ff4500;
+      border: none;
+      color: white;
+      padding: 8px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: 'Barlow', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    #btn-aplicar:hover { background: #e03d00; }
+
+    /* ── LOADING ──────────────────────────────────────────────────────────── */
+    #loading {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(13,13,13,0.95);
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-size: 14px;
+      color: #e8e8e8;
+      z-index: 2000;
+    }
+
+    /* ── PANEL SENTINEL ───────────────────────────────────────────────────── */
+    #sentinel-panel {
+      position: absolute;
+      bottom: 20px; left: 50%;
+      transform: translateX(-50%);
+      background: rgba(18,18,18,0.97);
+      border: 1px solid #ff4500;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 12px;
+      color: #e8e8e8;
+      z-index: 1000;
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      min-width: 360px;
+      max-width: 92vw;
+    }
+    #sentinel-panel.visible { display: flex; }
+
+    .sentinel-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .sentinel-tipo { font-size: 13px; font-weight: 600; color: #ff6b35; }
+    .sentinel-label-fechas {
+      font-size: 10px;
+      color: rgba(255,255,255,0.3);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 6px;
+    }
+    .fechas-sentinel { display: flex; gap: 6px; }
+    .btn-fecha-sentinel {
+      flex: 1;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #e8e8e8;
+      padding: 7px 6px;
+      border-radius: 6px;
+      font-size: 11px;
+      cursor: pointer;
+      font-family: 'Barlow', sans-serif;
+      text-align: center;
+      transition: background .15s;
+      line-height: 1.5;
+    }
+    .btn-fecha-sentinel:hover { background: rgba(255,255,255,0.15); }
+    .btn-fecha-sentinel.activo { background: #ff4500; border-color: #ff4500; color: white; }
+    .btn-fecha-label { font-size: 9px; opacity: .5; display: block; margin-bottom: 1px; }
+
+    #btn-cerrar-sentinel {
+      background: none;
+      border: 1px solid #E24B4A;
+      color: #E24B4A;
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+      font-family: 'Barlow', sans-serif;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    /* ── ÍCONOS FOCOS ─────────────────────────────────────────────────────── */
+    .icono-fuego {
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.3);
+      cursor: pointer;
+      transition: transform .15s;
+    }
+    .icono-fuego:hover { transform: scale(1.3); }
+
+    /* ── POPUP ────────────────────────────────────────────────────────────── */
+    .leaflet-popup { margin-top: 52px; }
+    .leaflet-popup-content-wrapper {
+      background: rgba(18,18,18,0.97) !important;
+      border: 1px solid rgba(255,255,255,0.12) !important;
+      border-radius: 10px !important;
+      color: #e8e8e8 !important;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
+    }
+    .leaflet-popup-tip { background: rgba(18,18,18,0.97) !important; }
+    .leaflet-popup-close-button { color: #E24B4A !important; font-size: 18px !important; font-weight: 700 !important; top: 6px !important; right: 8px !important; }
+
+    .popup-titulo {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 16px; font-weight: 700;
+      color: #ff6b35; margin-bottom: 10px;
+    }
+    .popup-fila {
+      display: flex; justify-content: space-between; gap: 16px;
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      font-size: 12px;
+    }
+    .popup-fila:last-child { border-bottom: none; }
+    .popup-key { color: rgba(255,255,255,0.45); }
+    .popup-val { color: #e8e8e8; font-weight: 500; text-align: right; }
+    .conf-alta { color: #ff4500; }
+    .conf-nominal { color: #ffaa00; }
+    .conf-baja { color: rgba(255,255,255,0.4); }
+
+    .btn-popup {
+      display: block; text-align: center;
+      padding: 7px; border-radius: 6px;
+      font-size: 12px; font-weight: 600;
+      margin-top: 6px; cursor: pointer;
+      border: none; width: 100%;
+      font-family: 'Barlow', sans-serif;
+    }
+
+    /* (btn-rapido eliminado) */
+
+    /* ── COMPARTIR — compacto ─────────────────────────────────────────────── */
+    .popup-share-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .popup-share-label {
+      font-size: 10px;
+      color: rgba(255,255,255,0.3);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      flex-shrink: 0;
+    }
+    .share-icons { display: flex; gap: 6px; }
+    .share-icon-btn {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px;
+      transition: transform .15s, opacity .15s;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+    .share-icon-btn:hover { transform: scale(1.15); opacity: .9; }
+    .share-fb   { background: #1877F2; }
+    .share-wa   { background: #25D366; }
+    .share-ig   { background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045); }
+    .share-link { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); }
+
+    .share-copied {
+      font-size: 10px; color: #25D366;
+      opacity: 0; transition: opacity .3s;
+      margin-left: 2px;
+    }
+    .share-copied.visible { opacity: 1; }
+
+    /* ── FAQ MODAL ────────────────────────────────────────────────────────── */
+    #faq-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(4px);
+      z-index: 3000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    #faq-overlay.visible { display: flex; }
+
+    #faq-modal {
+      background: #111;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 14px;
+      width: 100%;
+      max-width: 600px;
+      max-height: 82vh;
+      overflow-y: auto;
+      padding: 24px;
+      position: relative;
+    }
+
+    #faq-modal::-webkit-scrollbar { width: 5px; }
+    #faq-modal::-webkit-scrollbar-track { background: transparent; }
+    #faq-modal::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+
+    .faq-header {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 20px;
+    }
+    .faq-header-titulo {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 22px; font-weight: 700; color: #ff6b35;
+    }
+    .faq-header-sub {
+      font-size: 12px; color: rgba(255,255,255,0.35);
+      margin-top: 2px;
+    }
+
+    #btn-cerrar-faq {
+      position: absolute; top: 16px; right: 18px;
+      background: none; border: 1px solid rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.5); font-size: 14px;
+      padding: 4px 10px; border-radius: 5px;
+      cursor: pointer; font-family: 'Barlow', sans-serif;
+    }
+    #btn-cerrar-faq:hover { border-color: #E24B4A; color: #E24B4A; }
+
+    .faq-item {
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      padding: 14px 0;
+    }
+    .faq-item:last-child { border-bottom: none; padding-bottom: 0; }
+
+    .faq-pregunta {
+      font-size: 14px; font-weight: 600;
+      color: #e8e8e8; cursor: pointer;
+      display: flex; justify-content: space-between; align-items: flex-start;
+      gap: 12px;
+      user-select: none;
+    }
+    .faq-pregunta:hover { color: #ff6b35; }
+    .faq-chevron { font-size: 12px; opacity: .5; flex-shrink: 0; margin-top: 2px; transition: transform .2s; }
+    .faq-item.open .faq-chevron { transform: rotate(180deg); }
+
+    .faq-respuesta {
+      font-size: 13px;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.65;
+      margin-top: 10px;
+      display: none;
+    }
+    .faq-item.open .faq-respuesta { display: block; }
+
+    .faq-respuesta strong { color: rgba(255,255,255,0.8); }
+    .faq-respuesta em { color: #ff6b35; font-style: normal; }
+
+    .faq-tag {
+      display: inline-block;
+      font-size: 10px; font-weight: 600;
+      padding: 2px 7px; border-radius: 4px;
+      margin-right: 6px; vertical-align: middle;
+      text-transform: uppercase; letter-spacing: .05em;
+    }
+    .tag-sat { background: rgba(255,107,53,0.2); color: #ff6b35; }
+    .tag-datos { background: rgba(255,170,0,0.15); color: #ffaa00; }
+    .tag-uso { background: rgba(100,200,100,0.15); color: #80e080; }
+
+    /* ── BTN HISTÓRICO ───────────────────────────────────────────────────── */
+    #btn-historico {
+      background: rgba(255,69,0,0.15);
+      border: 1px solid rgba(255,69,0,0.4);
+      color: #ff6b35;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: 'Barlow', sans-serif;
+      cursor: pointer;
+      transition: background .2s;
+      white-space: nowrap;
+      font-weight: 600;
+    }
+    #btn-historico:hover { background: rgba(255,69,0,0.28); }
+    #btn-historico.activo { background: #ff4500; color: white; border-color: #ff4500; }
+
+    /* ── PANEL HISTÓRICO ─────────────────────────────────────────────────── */
+    #panel-historico {
+      position: absolute;
+      top: 62px; left: 50%;
+      transform: translateX(-50%);
+      width: 680px;
+      max-width: 96vw;
+      background: rgba(13,13,13,0.97);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      z-index: 1002;
+      padding: 20px;
+      display: none;
+    }
+    #panel-historico.visible { display: block; }
+
+    .hist-titulo {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 18px; font-weight: 700;
+      color: #ff6b35;
+      margin-bottom: 4px;
+    }
+    .hist-subtitulo {
+      font-size: 12px; color: rgba(255,255,255,0.35);
+      margin-bottom: 16px;
+    }
+
+    .casos-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .caso-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 14px;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+    }
+    .caso-card:hover { border-color: #ff4500; background: rgba(255,69,0,0.07); }
+    .caso-card.activo { border-color: #ff4500; background: rgba(255,69,0,0.1); }
+
+    .caso-nombre {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 15px; font-weight: 700;
+      color: #e8e8e8; margin-bottom: 3px;
+    }
+    .caso-lugar { font-size: 11px; color: rgba(255,255,255,0.4); margin-bottom: 8px; }
+    .caso-ha {
+      font-size: 13px; font-weight: 600;
+      color: #ff6b35; margin-bottom: 6px;
+    }
+    .caso-fechas { font-size: 11px; color: rgba(255,255,255,0.3); line-height: 1.6; }
+    .caso-fechas span { color: rgba(255,255,255,0.55); }
+
+    /* ── PANEL SLIDER ACTIVO ─────────────────────────────────────────────── */
+    #slider-panel {
+      position: absolute;
+      bottom: 20px; left: 50%;
+      transform: translateX(-50%);
+      background: rgba(13,13,13,0.95);
+      border: 1px solid rgba(255,69,0,0.5);
+      border-radius: 10px;
+      padding: 12px 16px;
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      gap: 14px;
+      min-width: 360px;
+      max-width: 90vw;
+    }
+    #slider-panel.visible { display: flex; }
+
+    .slider-caso-nombre {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 14px; font-weight: 700;
+      color: #ff6b35; white-space: nowrap;
+    }
+    .slider-fechas { font-size: 11px; color: rgba(255,255,255,0.4); }
+
+    .slider-toggle-btns { display: flex; gap: 5px; margin-left: auto; }
+    .btn-slider-tipo {
+      padding: 4px 10px;
+      border-radius: 5px;
+      font-size: 11px; font-weight: 600;
+      font-family: 'Barlow', sans-serif;
+      cursor: pointer; border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.6);
+      transition: all .15s;
+    }
+    .btn-slider-tipo.activo { background: #ff4500; border-color: #ff4500; color: white; }
+
+    #btn-cerrar-slider {
+      background: none; border: 1px solid rgba(255,75,74,0.4);
+      color: #E24B4A; padding: 3px 10px;
+      border-radius: 4px; font-size: 11px;
+      cursor: pointer; font-family: 'Barlow', sans-serif;
+      font-weight: 600; white-space: nowrap;
+    }
+
+    /* ── SIDE BY SIDE DIVIDER ────────────────────────────────────────────── */
+    .leaflet-sbs-range {
+      -webkit-appearance: none;
+      display: block;
+      width: 100%;
+      cursor: ew-resize;
+      background: transparent;
+    }
+    .leaflet-sbs-divider {
+      position: absolute;
+      top: 0; bottom: 0;
+      left: 50%;
+      margin-left: -2px;
+      width: 4px;
+      background: white;
+      z-index: 999;
+      pointer-events: none;
+    }
+</head>
+<body>
+
+  <!-- ── HEADER ────────────────────────────────────────────────────────────── -->
+  <div id="header">
+    <div id="logo">🔥 <span>FUEGO</span>AR</div>
+    <button id="btn-filtros" onclick="toggleFiltros()">⚙ Filtros</button>
+    <button id="btn-toggle-focos" onclick="toggleFocos()">🔥 Ocultar focos</button>
+    <button id="btn-historico" onclick="toggleHistorico()">📂 Casos históricos</button>
+    <button id="btn-faq" onclick="toggleFaq()">? FAQ</button>
+    <div id="contador-header">Focos: <strong id="num-focos">—</strong></div>
+  </div>
+
+  <!-- ── PANEL HISTÓRICO ───────────────────────────────────────────────────── -->
+  <div id="panel-historico">
+    <div class="hist-titulo">📂 Casos históricos documentados</div>
+    <div class="hist-subtitulo">Análisis satelital pre/durante/post incendio · Sentinel-2 L2A · Google Earth Engine</div>
+    <div class="casos-grid">
+      <div class="caso-card" onclick="abrirCaso('manzanos')">
+        <div class="caso-nombre">🔥 Los Manzanos</div>
+        <div class="caso-lugar">PN Nahuel Huapi · Río Negro</div>
+        <div class="caso-ha">~11.475 ha afectadas</div>
+        <div class="caso-fechas">Inicio: <span>25 dic 2024</span> (rayo)<br>Pre: <span>18 nov 2024</span> · Post: <span>13 feb 2025</span></div>
+      </div>
+      <div class="caso-card" onclick="abrirCaso('lanin')">
+        <div class="caso-nombre">🔥 Lanín / Valle Magdalena</div>
+        <div class="caso-lugar">PN Lanín · Neuquén</div>
+        <div class="caso-ha">~24.100 ha afectadas</div>
+        <div class="caso-fechas">Inicio: <span>1 ene 2025</span><br>Pre: <span>25 dic 2024</span> · Post: <span>21 feb 2025</span></div>
+      </div>
+      <div class="caso-card" onclick="abrirCaso('madryn')">
+        <div class="caso-nombre">🔥 Puerto Madryn</div>
+        <div class="caso-lugar">Estepa costera · Chubut</div>
+        <div class="caso-ha">Estepa patagónica</div>
+        <div class="caso-fechas">Inicio: <span>ene 2025</span><br>Pre: <span>3 ene 2025</span> · Post: <span>4 feb 2025</span></div>
+      </div>
+      <div class="caso-card" onclick="abrirCaso('alerces')">
+        <div class="caso-nombre">🔥 Los Alerces "El Centinela"</div>
+        <div class="caso-lugar">PN Los Alerces · Chubut</div>
+        <div class="caso-ha">~6.924 ha dentro del parque</div>
+        <div class="caso-fechas">Inicio: <span>9 dic 2025</span> (rayo)<br>Pre: <span>3 nov 2025</span> · Post: <span>21 feb 2026</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PANEL SLIDER ACTIVO ───────────────────────────────────────────────── -->
+  <div id="slider-panel">
+    <div>
+      <div class="slider-caso-nombre" id="slider-nombre">—</div>
+      <div class="slider-fechas" id="slider-fechas">← antes &nbsp;|&nbsp; después →</div>
+    </div>
+    <div class="slider-toggle-btns">
+      <button class="btn-slider-tipo activo" id="btn-rgb" onclick="cambiarTipoSlider('rgb')">RGB</button>
+      <button class="btn-slider-tipo" id="btn-swir" onclick="cambiarTipoSlider('swir')">SWIR</button>
+    </div>
+    <button id="btn-cerrar-slider" onclick="cerrarSlider()">✕ Cerrar</button>
+  </div>
+
+  <!-- ── PANEL FILTROS ─────────────────────────────────────────────────────── -->
+  <div id="panel-filtros">
+
+    <div class="filtro-titulo">Confiabilidad</div>
+    <div class="filtro-desc">El satélite clasifica cada detección según la certeza de que sea un incendio real y no un falso positivo (suelo caliente, reflejo solar, industria).</div>
+    <label class="check-row">
+      <input type="checkbox" id="conf-alta" checked>
+      <span class="dot-conf" style="background:#ff4500"></span>Alta — muy probable incendio real
+    </label>
+    <label class="check-row">
+      <input type="checkbox" id="conf-nominal" checked>
+      <span class="dot-conf" style="background:#ffaa00"></span>Nominal — probable, requiere verificación
+    </label>
+    <label class="check-row">
+      <input type="checkbox" id="conf-baja">
+      <span class="dot-conf" style="background:rgba(200,200,200,0.5)"></span>Baja — posible falso positivo
+    </label>
+
+    <div class="filtro-titulo">Potencia Radiativa del Fuego (FRP)</div>
+    <div class="filtro-desc">
+      El FRP mide la energía infrarroja que emite el incendio, expresada en <strong style="color:#ff6b35">megawatts (MW)</strong>. A mayor FRP, más intenso y activo es el fuego.
+      Subir este umbral filtra focos pequeños o de baja intensidad — útil para enfocarte en incendios forestales relevantes y descartar quemas agrícolas menores.
+    </div>
+    <div class="frp-row">
+      <span>Mostrar focos con FRP mayor a</span>
+      <span><span id="frp-valor">0</span> MW</span>
+    </div>
+    <input type="range" id="frp-slider" min="0" max="200" value="0"
+      oninput="document.getElementById('frp-valor').textContent = this.value">
+    <div class="frp-escala">
+      <div class="frp-tag">0–10 MW<br><span style="opacity:.5">quema chica</span></div>
+      <div class="frp-tag">10–50 MW<br><span style="opacity:.5">forestal activo</span></div>
+      <div class="frp-tag">&gt;100 MW<br><span style="opacity:.5">incendio severo</span></div>
+    </div>
+
+    <div class="filtro-titulo">Fecha específica</div>
+    <div class="fecha-row">
+      <label>Seleccioná un día para ver sus focos. Sin selección se cargan los focos recientes.</label>
+      <input type="date" id="fecha-especifica">
+      <div class="nota">NASA FIRMS · VIIRS NOAA-20 y NOAA-21</div>
+    </div>
+
+    <button id="btn-aplicar" onclick="cargarDatos()">Aplicar filtros</button>
+  </div>
+
+  <!-- compartir ahora va inline en el popup -->
+
+  <!-- ── PANEL SENTINEL ────────────────────────────────────────────────────── -->
+  <div id="sentinel-panel">
+    <div class="sentinel-row">
+      <span class="sentinel-tipo" id="sentinel-tipo-txt">🛰 Sentinel-2</span>
+      <button id="btn-cerrar-sentinel" onclick="cerrarSentinel()">✕ Cerrar</button>
+    </div>
+    <div>
+      <div class="sentinel-label-fechas">Imágenes disponibles — seleccioná para comparar</div>
+      <div class="fechas-sentinel" id="fechas-sentinel-btns">
+        <div class="nota">Buscando imágenes reales...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FAQ MODAL ─────────────────────────────────────────────────────────── -->
+  <div id="faq-overlay" onclick="cerrarFaqOverlay(event)">
+    <div id="faq-modal">
+      <button id="btn-cerrar-faq" onclick="toggleFaq()">✕ Cerrar</button>
+      <div class="faq-header">
+        <div>
+          <div class="faq-header-titulo">🔥 Preguntas frecuentes</div>
+          <div class="faq-header-sub">Cómo interpretar los datos · Satélites · Funcionamiento de la app</div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-pregunta" onclick="toggleFaqItem(this)">
+          <span><span class="faq-tag tag-sat">Satélite</span>Veo un foco activo en el mapa, pero al ver la imagen Sentinel-2 no aparece la cicatriz de quemadura. ¿Por qué?</span>
+          <span class="faq-chevron">▼</span>
+        </div>
+        <div class="faq-respuesta">
+          Es una de las confusiones más frecuentes y tiene una explicación técnica clara: los focos activos y las cicatrices de quemadura se detectan en <em>momentos diferentes</em> y con <em>sensores diferentes</em>.<br><br>
+          <strong>El foco activo</strong> lo detecta el satélite VIIRS (NASA) en el <strong>infrarrojo térmico</strong> — básicamente, mide el calor que emite el fuego en el momento exacto del pasaje del satélite (2 veces por día sobre Argentina). Es una detección casi en tiempo real.<br><br>
+          <strong>La cicatriz de quemadura</strong> la ves en Sentinel-2, que trabaja en el <strong>infrarrojo de onda corta (SWIR)</strong> y en luz visible. Para que aparezca la cicatriz necesitás que el fuego ya haya pasado, que el satélite haya capturado esa zona después de la quema, y que no haya nubes tapando el área.<br><br>
+          En resumen: podés ver un foco activo hoy y recién ver la cicatriz en Sentinel-2 <strong>3 a 10 días después</strong>, cuando el satélite pase nuevamente por esa zona sin nubosidad. Usá el botón <em>☁ anterior / más cercana / posterior</em> en el panel de Sentinel para explorar imágenes de días distintos.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-pregunta" onclick="toggleFaqItem(this)">
+          <span><span class="faq-tag tag-datos">Datos</span>¿Con qué frecuencia se actualizan los focos activos?</span>
+          <span class="faq-chevron">▼</span>
+        </div>
+        <div class="faq-respuesta">
+          Los datos provienen de los satélites <em>VIIRS a bordo de NOAA-20 y NOAA-21</em>, operados por NASA. Cada satélite sobrevuela Argentina <strong>aproximadamente 2 veces por día</strong> (una pasada de día y una de noche). Los datos se publican en la plataforma NASA FIRMS con un retraso de <strong>3 a 6 horas</strong> desde el pasaje del satélite.<br><br>
+          La app carga por defecto los focos más recientes. Podés elegir una fecha específica con el calendario para ver incendios de días anteriores.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-pregunta" onclick="toggleFaqItem(this)">
+          <span><span class="faq-tag tag-datos">Datos</span>¿Qué significa la confiabilidad Alta, Nominal y Baja?</span>
+          <span class="faq-chevron">▼</span>
+        </div>
+        <div class="faq-respuesta">
+          Es la clasificación del algoritmo de NASA sobre la probabilidad de que la detección sea un incendio real y no un <strong>falso positivo</strong>.<br><br>
+          <strong>Alta (rojo)</strong> — el algoritmo tiene alta certeza. Es el dato más confiable para alertas inmediatas.<br>
+          <strong>Nominal (amarillo)</strong> — probable incendio, pero puede incluir superficies muy calientes como techos metálicos, quemas de rastrojo o gases industriales. Vale la pena verificar con la imagen Sentinel.<br>
+          <strong>Baja (gris)</strong> — mucha incertidumbre. Suelen aparecer en zonas áridas, playas y desiertos con temperatura superficial alta. Por defecto está desactivada.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-pregunta" onclick="toggleFaqItem(this)">
+          <span><span class="faq-tag tag-sat">Satélite</span>¿Qué diferencia hay entre la imagen en color real y la imagen SWIR?</span>
+          <span class="faq-chevron">▼</span>
+        </div>
+        <div class="faq-respuesta">
+          <strong>Color real (True Color)</strong> muestra lo que el ojo humano vería desde el espacio: vegetación verde, suelo marrón, nieve blanca, humo gris. Muy intuitiva pero el fuego activo puede quedar oculto bajo el humo.<br><br>
+          <strong>SWIR (Short Wave InfraRed)</strong> combina bandas infrarrojas de onda corta con el rojo visible. En esta composición, <em>las zonas con fuego activo aparecen en rojo brillante y las cicatrices de quemadura en marrón oscuro o negro</em>, aunque el humo las tape en color real. Es la imagen más útil para análisis de incendios.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-pregunta" onclick="toggleFaqItem(this)">
+          <span><span class="faq-tag tag-datos">Datos</span>¿Qué es el FRP y para qué sirve el filtro?</span>
+          <span class="faq-chevron">▼</span>
+        </div>
+        <div class="faq-respuesta">
+          <em>FRP</em> son las siglas de <strong>Fire Radiative Power</strong> — Potencia Radiativa del Fuego. Mide la energía infrarroja que emite un incendio, expresada en <strong>megawatts (MW)</strong>. Es un proxy directo de la intensidad del fuego en el momento del pasaje del satélite.<br><br>
+          <strong>0–10 MW</strong> — quemas de pastizal, fogones, pequeños focos.<br>
+          <strong>10–50 MW</strong> — incendios forestales activos de tamaño moderado.<br>
+          <strong>50–200 MW</strong> — frentes de fuego grandes, incendios severos.<br>
+          <strong>&gt;200 MW</strong> — eventos extremos (como los incendios de Corrientes 2022 o Los Alerces 2025).<br><br>
+          Subir el umbral del filtro te permite enfocarte solo en los incendios relevantes y descartar el "ruido" de quemas menores.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-pregunta" onclick="toggleFaqItem(this)">
+          <span><span class="faq-tag tag-uso">Uso</span>¿Cada cuánto se renueva la imagen Sentinel-2?</span>
+          <span class="faq-chevron">▼</span>
+        </div>
+        <div class="faq-respuesta">
+          Sentinel-2 tiene una <strong>revisita de 5 días</strong> sobre Argentina (con los dos satélites, S2A y S2B). Eso significa que para cualquier punto del país hay una imagen nueva cada 5 días aproximadamente — si no hay nubes.<br><br>
+          En zonas de alta nubosidad (norte de Argentina, Patagonia en invierno) puede pasar más tiempo hasta tener una imagen útil. En la app podés ver los botones <em>anterior / más cercana / posterior</em> que muestran las fechas reales disponibles del catálogo de satélites.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-pregunta" onclick="toggleFaqItem(this)">
+          <span><span class="faq-tag tag-uso">Uso</span>¿Los datos son oficiales? ¿Puedo usarlos para reportar un incendio?</span>
+          <span class="faq-chevron">▼</span>
+        </div>
+        <div class="faq-respuesta">
+          Los datos de focos activos provienen directamente de <em>NASA FIRMS</em>, una plataforma científica oficial usada por gobiernos, bomberos y ONGs de todo el mundo. Son los mismos datos que usan CONAE, Parques Nacionales y el Servicio Nacional de Manejo del Fuego (SNMF) en Argentina.<br><br>
+          <strong>Para reportar un incendio activo</strong> llamá al <em>0800-555-6624</em> (línea gratuita de emergencias forestales) o contactá a los bomberos locales. Esta app es una herramienta de monitoreo y visualización, no reemplaza los canales oficiales de emergencia.
+        </div>
+      </div>
+
+    </div><!-- #faq-modal -->
+  </div><!-- #faq-overlay -->
+
+  <div id="loading">Cargando focos de NASA...</div>
+  <div id="mapa"></div>
+
+  <script>
+    var mapa = L.map('mapa', { zoomControl: false }).setView([-38, -63], 4);
+    L.control.zoom({ position: 'bottomright' }).addTo(mapa);
+
+    var satelital = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri' });
+    var ign = L.tileLayer('https://wms.ign.gob.ar/geoserver/gwc/service/tms/1.0.0/capabaseargenmap@EPSG%3A3857@png/{z}/{x}/{-y}.png', { attribution: 'IGN Argentina', minZoom: 3, maxZoom: 18 });
+    var hibrido = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', { attribution: 'Google' });
+
+    satelital.addTo(mapa);
+
+    var controlCapas = L.control.layers(
+      { "Satelital (ESRI)": satelital, "IGN Argentina": ign, "Híbrido (Google)": hibrido },
+      {}, { position: 'bottomright' }
+    ).addTo(mapa);
+
+    var hoy = new Date().toISOString().split('T')[0];
+    document.getElementById('fecha-especifica').setAttribute('max', hoy);
+
+    var capaSentinel = null;
+    var sentinelParams = null;
+    var focosVisibles = true;
+    var primeraVezSentinel = true;
+    var INSTANCE_ID = 'c87c1637-7fee-40c3-96fa-f9037b487389';
+    var focoActualCompartir = null; // legacy — se puede quitar en próxima limpieza
+
+    // ── Helpers de fecha ──────────────────────────────────────────────────────
+    function formatFecha(iso) {
+      var p = iso.split('-');
+      return p[2] + '/' + p[1] + '/' + p[0];
+    }
+    function addDays(isoDate, days) {
+      var d = new Date(isoDate);
+      d.setDate(d.getDate() + days);
+      return d.toISOString().split('T')[0];
+    }
+    function diffDays(a, b) {
+      return Math.round((new Date(a) - new Date(b)) / 86400000);
+    }
+
+    // ── Botones rápidos de fecha ───────────────────────────────────────────
+    var diasCarga = 2; // carga últimos 2 días por defecto — sin mostrarlo en la UI
+
+    // ── Compartir — funciones inline ──────────────────────────────────────
+    function compartirWA(lat, lng, frp, fecha) {
+      var url = 'https://gerabarion-hash.github.io/fuego-ar/?lat=' + lat.toFixed(4) + '&lng=' + lng.toFixed(4) + '&z=12';
+      var txt = '🔥 Foco activo NASA · ' + lat.toFixed(3) + ', ' + lng.toFixed(3) + ' · FRP ' + frp.toFixed(0) + ' MW · ' + fecha + ' · ' + url + ' via FuegoAR';
+      window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank');
+    }
+    function compartirFB(lat, lng) {
+      var url = 'https://gerabarion-hash.github.io/fuego-ar/?lat=' + lat.toFixed(4) + '&lng=' + lng.toFixed(4) + '&z=12';
+      window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url), '_blank');
+    }
+    function compartirIG(lat, lng, frp, fecha, btnEl) {
+      var url = 'https://gerabarion-hash.github.io/fuego-ar/?lat=' + lat.toFixed(4) + '&lng=' + lng.toFixed(4) + '&z=12';
+      var txt = '🔥 Foco activo detectado por satélite NASA\n📍 ' + lat.toFixed(3) + ', ' + lng.toFixed(3) + '\n⚡ ' + frp.toFixed(0) + ' MW · ' + fecha + '\n🛰 FuegoAR — ' + url + '\n#incendio #argentina #satelite #NASA';
+      navigator.clipboard.writeText(txt).then(function() {
+        var fb = btnEl.closest('.popup-share-row').querySelector('.share-copied');
+        if (fb) { fb.textContent = '✓ Copiado'; fb.classList.add('visible'); setTimeout(function(){ fb.classList.remove('visible'); }, 2500); }
+      });
+    }
+    function compartirLink(lat, lng, btnEl) {
+      var url = 'https://gerabarion-hash.github.io/fuego-ar/?lat=' + lat.toFixed(4) + '&lng=' + lng.toFixed(4) + '&z=12';
+      navigator.clipboard.writeText(url).then(function() {
+        var fb = btnEl.closest('.popup-share-row').querySelector('.share-copied');
+        if (fb) { fb.textContent = '✓ Enlace copiado'; fb.classList.add('visible'); setTimeout(function(){ fb.classList.remove('visible'); }, 2500); }
+      });
+    }
+    window.compartirWA = compartirWA;
+    window.compartirFB = compartirFB;
+    window.compartirIG = compartirIG;
+    window.compartirLink = compartirLink;
+
+    // ── FAQ ───────────────────────────────────────────────────────────────────
+    function toggleFaq() {
+      document.getElementById('faq-overlay').classList.toggle('visible');
+      document.getElementById('panel-filtros').classList.remove('visible');
+    }
+    function cerrarFaqOverlay(e) {
+      if (e.target === document.getElementById('faq-overlay')) toggleFaq();
+    }
+    function toggleFaqItem(el) {
+      var item = el.parentElement;
+      var wasOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item.open').forEach(function(i) { i.classList.remove('open'); });
+      if (!wasOpen) item.classList.add('open');
+    }
+
+    // ── UI general ────────────────────────────────────────────────────────────
+    function toggleFiltros() {
+      document.getElementById('panel-filtros').classList.toggle('visible');
+      document.getElementById('faq-overlay').classList.remove('visible');
+    }
+    function toggleFocos() {
+      focosVisibles = !focosVisibles;
+      var btn = document.getElementById('btn-toggle-focos');
+      if (focosVisibles) {
+        mapa.addLayer(capaFocos);
+        btn.textContent = '🔥 Ocultar focos';
+        btn.classList.remove('oculto');
+      } else {
+        mapa.removeLayer(capaFocos);
+        btn.textContent = '🔥 Mostrar focos';
+        btn.classList.add('oculto');
+      }
+    }
+
+    // ── Sentinel: cerrar ──────────────────────────────────────────────────────
+    function cerrarSentinel() {
+      if (capaSentinel) {
+        controlCapas.removeLayer(capaSentinel);
+        mapa.removeLayer(capaSentinel);
+        capaSentinel = null;
+        sentinelParams = null;
+      }
+      primeraVezSentinel = true;
+      document.getElementById('sentinel-panel').classList.remove('visible');
+    }
+
+    // ── Sentinel: cargar capa WMS ─────────────────────────────────────────────
+    function cargarCapaSentinel(lat, lng, fechaImg, tipo, aplicarZoom) {
+      if (capaSentinel) {
+        controlCapas.removeLayer(capaSentinel);
+        mapa.removeLayer(capaSentinel);
+        capaSentinel = null;
+      }
+      document.querySelectorAll('.btn-fecha-sentinel').forEach(function(btn) {
+        btn.classList.toggle('activo', btn.dataset.fecha === fechaImg);
+      });
+      var timeParam = fechaImg + 'T00:00:00.000Z/' + fechaImg + 'T23:59:59.000Z';
+      var layerName = tipo === 'swir' ? 'SWIR' : 'TRUE_COLOR';
+      var etiqueta  = tipo === 'swir' ? '🔴 Sentinel SWIR' : '🛰 Sentinel Color';
+      var delta = 0.3;
+      var bounds = L.latLngBounds([lat - delta, lng - delta], [lat + delta, lng + delta]);
+
+      capaSentinel = L.tileLayer.wms(
+        'https://sh.dataspace.copernicus.eu/ogc/wms/' + INSTANCE_ID, {
+          layers: layerName, format: 'image/jpeg', transparent: false,
+          time: timeParam, maxcc: 100, tileSize: 512, bounds: bounds,
+          MOSAICKING_ORDER: 'mostRecentPixel',
+          attribution: 'Sentinel-2 L2A · Copernicus ESA'
+        }
+      );
+      capaSentinel.addTo(mapa);
+      controlCapas.addOverlay(capaSentinel, etiqueta + ' · ' + formatFecha(fechaImg));
+      if (aplicarZoom) mapa.setView([lat, lng], 13);
+      document.getElementById('sentinel-tipo-txt').textContent = etiqueta + ' · ' + formatFecha(fechaImg);
+    }
+
+    // ── Sentinel: botones A/B/C ───────────────────────────────────────────────
+    function renderizarBotonesFechas(seleccion, lat, lng, fechaFoco, tipo, imgB) {
+      var contenedor = document.getElementById('fechas-sentinel-btns');
+      if (seleccion.length === 0) {
+        contenedor.innerHTML = '<div class="nota">No hay imágenes disponibles para esta ubicación.</div>';
+        return;
+      }
+      var rolLabel = { 'A': 'anterior', 'B': 'más cercana', 'C': 'posterior' };
+      var html = '';
+      seleccion.forEach(function(s) {
+        var nubesTexto = s.item.nubes !== null ? '☁ ' + s.item.nubes + '%' : '☁ estimada';
+        html += '<button class="btn-fecha-sentinel" data-fecha="' + s.item.fecha + '" ' +
+          'onclick="cargarCapaSentinel(' + lat + ',' + lng + ',\'' + s.item.fecha + '\',\'' + tipo + '\', false)">' +
+          '<span class="btn-fecha-label">' + rolLabel[s.rol] + '</span>' +
+          formatFecha(s.item.fecha) + '<br>' +
+          '<span style="font-size:10px;opacity:.6;">' + nubesTexto + '</span>' +
+          '</button>';
+      });
+      contenedor.innerHTML = html;
+      cargarCapaSentinel(lat, lng, imgB.fecha, tipo, primeraVezSentinel);
+      primeraVezSentinel = false;
+    }
+
+    // ── Sentinel: buscar fechas (Element84 → Copernicus → estimadas) ──────────
+    function buscarFechasSentinel(lat, lng, fechaFoco, tipo) {
+      var delta = 0.15;
+      var bbox = (lng - delta) + ',' + (lat - delta) + ',' + (lng + delta) + ',' + (lat + delta);
+      var desde = addDays(fechaFoco, -20);
+      var hasta = addDays(fechaFoco, 8);
+      var ahora = new Date().toISOString().split('T')[0];
+      if (hasta > ahora) hasta = ahora;
+
+      document.getElementById('fechas-sentinel-btns').innerHTML =
+        '<div class="nota">Buscando imágenes disponibles...</div>';
+
+      var urlElement84 = 'https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items' +
+        '?bbox=' + bbox + '&datetime=' + desde + 'T00:00:00Z/' + hasta + 'T23:59:59Z&limit=30';
+
+      fetch(urlElement84)
+        .then(function(r) {
+          if (!r.ok) throw new Error('E84 HTTP ' + r.status);
+          return r.json();
+        })
+        .then(function(data) {
+          if (!data.features || data.features.length === 0) throw new Error('sin resultados');
+          procesarFeatures(data.features, lat, lng, fechaFoco, tipo);
+        })
+        .catch(function(e1) {
+          var urlCopernicus = 'https://catalogue.dataspace.copernicus.eu/stac/collections/SENTINEL-2/items' +
+            '?bbox=' + bbox + '&datetime=' + desde + 'T00:00:00Z/' + hasta + 'T23:59:59Z&limit=30&sortby=datetime';
+          fetch('https://corsproxy.io/?url=' + encodeURIComponent(urlCopernicus))
+            .then(function(r) {
+              if (!r.ok) throw new Error('Copernicus HTTP ' + r.status);
+              return r.json();
+            })
+            .then(function(data) {
+              if (!data.features || data.features.length === 0) throw new Error('sin resultados');
+              procesarFeatures(data.features, lat, lng, fechaFoco, tipo);
+            })
+            .catch(function() { usarFechasEstimadas(lat, lng, fechaFoco, tipo); });
+        });
+    }
+
+    function procesarFeatures(features, lat, lng, fechaFoco, tipo) {
+      var vistas = {}, todas = [];
+      features.forEach(function(f) {
+        var fecha = (f.properties.datetime || '').split('T')[0];
+        if (!fecha) {
+          var m = (f.id || '').match(/(\d{8})T\d{6}/);
+          if (m) fecha = m[1].slice(0,4) + '-' + m[1].slice(4,6) + '-' + m[1].slice(6,8);
+        }
+        var nubes = Math.round(f.properties['eo:cloud_cover'] || f.properties['cloudcover'] || 0);
+        if (fecha && !vistas[fecha]) { vistas[fecha] = true; todas.push({ fecha: fecha, nubes: nubes }); }
+      });
+      if (todas.length === 0) { usarFechasEstimadas(lat, lng, fechaFoco, tipo); return; }
+      todas.sort(function(a, b) { return a.fecha.localeCompare(b.fecha); });
+      seleccionarABC(todas, lat, lng, fechaFoco, tipo);
+    }
+
+    function usarFechasEstimadas(lat, lng, fechaFoco, tipo) {
+      var todas = [];
+      for (var d = -20; d <= 8; d += 5) {
+        var f = addDays(fechaFoco, d);
+        if (f <= new Date().toISOString().split('T')[0]) todas.push({ fecha: f, nubes: null });
+      }
+      seleccionarABC(todas, lat, lng, fechaFoco, tipo);
+    }
+
+    function seleccionarABC(todas, lat, lng, fechaFoco, tipo) {
+      var idxB = 0, minDiff = Infinity;
+      todas.forEach(function(item, i) {
+        var d = Math.abs(diffDays(item.fecha, fechaFoco));
+        if (d < minDiff) { minDiff = d; idxB = i; }
+      });
+      var imgB = todas[idxB];
+      var imgA = null, imgC = null;
+      var hoyStr = new Date().toISOString().split('T')[0];
+      for (var i = idxB - 1; i >= 0; i--) {
+        if (diffDays(imgB.fecha, todas[i].fecha) <= 6) { imgA = todas[i]; break; }
+      }
+      for (var j = idxB + 1; j < todas.length; j++) {
+        if (diffDays(todas[j].fecha, imgB.fecha) <= 6 && todas[j].fecha <= hoyStr) { imgC = todas[j]; break; }
+      }
+      var sel = [];
+      if (imgA) sel.push({ item: imgA, rol: 'A' });
+      sel.push({ item: imgB, rol: 'B' });
+      if (imgC) sel.push({ item: imgC, rol: 'C' });
+      renderizarBotonesFechas(sel, lat, lng, fechaFoco, tipo, imgB);
+    }
+
+    function verSentinel(lat, lng, fechaFoco, tipo) {
+      sentinelParams = { lat: lat, lng: lng, fechaFoco: fechaFoco, tipo: tipo };
+      primeraVezSentinel = true;
+      mapa.closePopup();
+      document.getElementById('sentinel-tipo-txt').textContent =
+        tipo === 'swir' ? '🔴 Sentinel SWIR' : '🛰 Sentinel Color';
+      document.getElementById('sentinel-panel').classList.add('visible');
+      buscarFechasSentinel(lat, lng, fechaFoco, tipo);
+    }
+
+    window.verSentinel = verSentinel;
+    window.cargarCapaSentinel = cargarCapaSentinel;
+
+    // ── Punto en polígono ─────────────────────────────────────────────────────
+    function pointInPolygon(lat, lng, polygon) {
+      var x = lng, y = lat, inside = false;
+      for (var i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+        var xi = polygon[i][0], yi = polygon[i][1];
+        var xj = polygon[j][0], yj = polygon[j][1];
+        if (((yi > y) != (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi))
+          inside = !inside;
+      }
+      return inside;
+    }
+    function dentroDeArgentina(lat, lng, geojson) {
+      for (var f = 0; f < geojson.features.length; f++) {
+        var geom = geojson.features[f].geometry;
+        var polys = geom.type === 'Polygon' ? [geom.coordinates] : geom.coordinates;
+        for (var p = 0; p < polys.length; p++) {
+          if (pointInPolygon(lat, lng, polys[p][0])) return true;
+        }
+      }
+      return false;
+    }
+
+    // ── Íconos ────────────────────────────────────────────────────────────────
+    function colorPorConfianza(conf) {
+      if (conf === 'h') return '#ff4500';
+      if (conf === 'n') return '#ffaa00';
+      return 'rgba(200,200,200,0.6)';
+    }
+    function tamanioPorFRP(frp) {
+      if (frp > 100) return 28;
+      if (frp > 50)  return 22;
+      if (frp > 20)  return 17;
+      if (frp > 10)  return 13;
+      return 10;
+    }
+    function etiquetaConf(conf) {
+      if (conf === 'h') return '<span class="conf-alta">Alta</span>';
+      if (conf === 'n') return '<span class="conf-nominal">Nominal</span>';
+      return '<span class="conf-baja">Baja</span>';
+    }
+    function crearIcono(frp, conf) {
+      var size = tamanioPorFRP(frp);
+      var color = colorPorConfianza(conf);
+      var fs = Math.round(size * 0.85);
+      return L.divIcon({
+        className: '',
+        html: '<div class="icono-fuego" style="width:' + size + 'px;height:' + size + 'px;background:' + color + '22;border-color:' + color + ';font-size:' + fs + 'px;">🔥</div>',
+        iconSize: [size, size], iconAnchor: [size/2, size/2]
+      });
+    }
+
+    // ── NASA FIRMS ────────────────────────────────────────────────────────────
+    var API_KEY = 'aadd078296d892e986dd7e921e040ce7';
+    var todosLosfocos = [];
+    var geojsonGlobal = null;
+    var capaFocos = L.layerGroup().addTo(mapa);
+
+    function cargarDatos() {
+      mapa.setView([-38, -63], 4);
+      cerrarSentinel();
+
+      var fechaElegida = document.getElementById('fecha-especifica').value;
+      var dias = diasCarga, sufijo = '';
+      if (fechaElegida) { dias = 1; sufijo = '/' + fechaElegida; }
+
+      document.getElementById('loading').style.display = 'block';
+      todosLosfocos = [];
+
+      var base = 'https://firms.modaps.eosdis.nasa.gov/api/area/csv/' + API_KEY;
+      var bbox = '/-73,-55,-53,-22/';
+      var urls = [
+        base + '/VIIRS_NOAA20_NRT' + bbox + dias + sufijo,
+        base + '/VIIRS_NOAA21_NRT' + bbox + dias + sufijo
+      ];
+
+      var promesas = geojsonGlobal
+        ? [Promise.resolve(geojsonGlobal), fetch(urls[0]).then(function(r){ return r.text(); }), fetch(urls[1]).then(function(r){ return r.text(); })]
+        : [fetch('argentina.geojson').then(function(r){ return r.json(); }), fetch(urls[0]).then(function(r){ return r.text(); }), fetch(urls[1]).then(function(r){ return r.text(); })];
+
+      Promise.all(promesas)
+        .then(function(res) {
+          geojsonGlobal = res[0];
+          var csv = res[1] + '\n' + res[2].split('\n').slice(1).join('\n');
+          var lineas = csv.trim().split('\n');
+          lineas.shift();
+          lineas.forEach(function(linea) {
+            var c = linea.split(',');
+            var lat = parseFloat(c[0]), lng = parseFloat(c[1]);
+            var frp = parseFloat(c[12]) || 0;
+            var conf = c[9] ? c[9].trim().toLowerCase() : 'l';
+            var fecha = c[5] || '', hora = c[6] || '', sat = c[7] || '';
+            if (!isNaN(lat) && !isNaN(lng) && dentroDeArgentina(lat, lng, geojsonGlobal))
+              todosLosfocos.push({ lat: lat, lng: lng, frp: frp, conf: conf, fecha: fecha, hora: hora, sat: sat });
+          });
+          document.getElementById('loading').style.display = 'none';
+          aplicarFiltros();
+        })
+        .catch(function(e) {
+          document.getElementById('loading').textContent = 'Error al cargar datos.';
+          console.log(e);
+        });
+    }
+
+    function aplicarFiltros() {
+      var confAlta    = document.getElementById('conf-alta').checked;
+      var confNominal = document.getElementById('conf-nominal').checked;
+      var confBaja    = document.getElementById('conf-baja').checked;
+      var frpMin      = parseFloat(document.getElementById('frp-slider').value) || 0;
+
+      capaFocos.clearLayers();
+      var contador = 0;
+
+      todosLosfocos.forEach(function(f) {
+        var mostrar = false;
+        if (f.conf === 'h' && confAlta)    mostrar = true;
+        if (f.conf === 'n' && confNominal) mostrar = true;
+        if (f.conf === 'l' && confBaja)    mostrar = true;
+        if (f.frp < frpMin) mostrar = false;
+
+        if (mostrar) {
+          contador++;
+          var marker = L.marker([f.lat, f.lng], { icon: crearIcono(f.frp, f.conf) });
+          var lat = f.lat, lng = f.lng, frp = f.frp, fecha = f.fecha;
+
+          marker.bindPopup(
+            '<div class="popup-titulo">🔥 Foco activo</div>' +
+            '<div class="popup-fila"><span class="popup-key">Confianza</span><span class="popup-val">' + etiquetaConf(f.conf) + '</span></div>' +
+            '<div class="popup-fila"><span class="popup-key">FRP</span><span class="popup-val">' + f.frp.toFixed(1) + ' MW</span></div>' +
+            '<div class="popup-fila"><span class="popup-key">Satélite</span><span class="popup-val">' + f.sat + '</span></div>' +
+            '<div class="popup-fila"><span class="popup-key">Fecha / Hora</span><span class="popup-val">' + f.fecha + ' <span style="color:#ff6b35">·</span> ' + f.hora.replace(/:/g, '<span style="color:#ff6b35">:</span>') + ' UTC</span></div>' +
+            '<div class="popup-fila"><span class="popup-key">Coordenadas</span><span class="popup-val">' + f.lat.toFixed(4) + ', ' + f.lng.toFixed(4) + '</span></div>' +
+            '<button class="btn-popup" style="background:#ff4500;color:white;margin-top:10px;" onclick="verSentinel(' + lat + ',' + lng + ',\'' + fecha + '\',\'rgb\')">🛰 Ver imagen satelital</button>' +
+            '<button class="btn-popup" style="background:#1a1a1a;color:#ff6b35;border:1px solid #ff6b35;" onclick="verSentinel(' + lat + ',' + lng + ',\'' + fecha + '\',\'swir\')">🔴 Ver SWIR · detección fuego</button>' +
+            '<div class="popup-share-row">' +
+              '<span class="popup-share-label">Compartir</span>' +
+              '<div class="share-icons">' +
+                '<button class="share-icon-btn share-fb" title="Facebook" onclick="compartirFB(' + lat + ',' + lng + ')">f</button>' +
+                '<button class="share-icon-btn share-wa" title="WhatsApp" onclick="compartirWA(' + lat + ',' + lng + ',' + frp + ',\'' + fecha + '\')">&#128172;</button>' +
+                '<button class="share-icon-btn share-ig" title="Instagram (copiar texto)" onclick="compartirIG(' + lat + ',' + lng + ',' + frp + ',\'' + fecha + '\',this)">&#127916;</button>' +
+                '<button class="share-icon-btn share-link" title="Copiar enlace" onclick="compartirLink(' + lat + ',' + lng + ',this)">&#128279;</button>' +
+              '</div>' +
+              '<span class="share-copied"></span>' +
+            '</div>'
+          );
+
+          capaFocos.addLayer(marker);
+        }
+      });
+
+      document.getElementById('num-focos').textContent = contador;
+      document.getElementById('panel-filtros').classList.remove('visible');
+    }
+
+    // ── CASOS HISTÓRICOS ─────────────────────────────────────────────────────
+    var CASOS = {
+      manzanos: {
+        nombre: 'Los Manzanos — PN Nahuel Huapi',
+        lat: -41.497, lng: -71.661, zoom: 11,
+        pre:    '2024-11-18',
+        dur:    '2025-01-29',
+        post:   '2025-02-13'
+      },
+      lanin: {
+        nombre: 'Lanín / Valle Magdalena',
+        lat: -39.553, lng: -71.219, zoom: 11,
+        pre:    '2024-12-25',
+        dur:    '2025-02-01',
+        post:   '2025-02-21'
+      },
+      madryn: {
+        nombre: 'Puerto Madryn — Estepa Chubut',
+        lat: -42.305, lng: -65.008, zoom: 12,
+        pre:    '2025-01-03',
+        dur:    '2025-01-30',
+        post:   '2025-02-04'
+      },
+      alerces: {
+        nombre: 'Los Alerces "El Centinela"',
+        lat: -42.830, lng: -71.780, zoom: 11,
+        pre:    '2025-11-03',
+        dur:    '2026-01-04',
+        post:   '2026-02-21'
+      }
+    };
+
+    var sliderControl = null;
+    var sliderLayerIzq = null;
+    var sliderLayerDer = null;
+    var casoActual = null;
+    var tipoActual = 'rgb';
+
+    function toggleHistorico() {
+      var panel = document.getElementById('panel-historico');
+      panel.classList.toggle('visible');
+      document.getElementById('btn-historico').classList.toggle('activo', panel.classList.contains('visible'));
+      document.getElementById('panel-filtros').classList.remove('visible');
+      document.getElementById('faq-overlay').classList.remove('visible');
+    }
+
+    function crearCapaSentinelHist(fecha, tipo) {
+      var layerName = tipo === 'swir' ? 'SWIR' : 'TRUE_COLOR';
+      return L.tileLayer.wms(
+        'https://sh.dataspace.copernicus.eu/ogc/wms/' + INSTANCE_ID, {
+          layers: layerName,
+          format: 'image/jpeg',
+          transparent: false,
+          time: fecha + 'T00:00:00.000Z/' + fecha + 'T23:59:59.000Z',
+          maxcc: 100,
+          tileSize: 512,
+          MOSAICKING_ORDER: 'mostRecentPixel',
+          attribution: 'Sentinel-2 L2A · Copernicus ESA'
+        }
+      );
+    }
+
+    function abrirCaso(id) {
+      var caso = CASOS[id];
+      if (!caso) return;
+      casoActual = id;
+      tipoActual = 'rgb';
+
+      document.getElementById('panel-historico').classList.remove('visible');
+      document.getElementById('btn-historico').classList.remove('activo');
+
+      // Zoom al área
+      mapa.setView([caso.lat, caso.lng], caso.zoom);
+
+      // Limpiar slider anterior
+      cerrarSlider(true);
+
+      // Crear capas pre y post
+      sliderLayerIzq = crearCapaSentinelHist(caso.pre, tipoActual);
+      sliderLayerDer = crearCapaSentinelHist(caso.post, tipoActual);
+
+      sliderLayerIzq.addTo(mapa);
+      sliderLayerDer.addTo(mapa);
+
+      // Crear el control side-by-side
+      if (L.control.sideBySide) {
+        sliderControl = L.control.sideBySide(sliderLayerIzq, sliderLayerDer).addTo(mapa);
+      }
+
+      // Actualizar panel inferior
+      document.getElementById('slider-nombre').textContent = caso.nombre;
+      document.getElementById('slider-fechas').textContent =
+        '← ' + formatFecha(caso.pre) + '  |  ' + formatFecha(caso.post) + ' →';
+      document.getElementById('btn-rgb').classList.add('activo');
+      document.getElementById('btn-swir').classList.remove('activo');
+
+      // Marcar card activa
+      document.querySelectorAll('.caso-card').forEach(function(c) { c.classList.remove('activo'); });
+      var cards = document.querySelectorAll('.caso-card');
+      var idx = Object.keys(CASOS).indexOf(id);
+      if (cards[idx]) cards[idx].classList.add('activo');
+
+      document.getElementById('slider-panel').classList.add('visible');
+    }
+
+    function cambiarTipoSlider(tipo) {
+      if (!casoActual) return;
+      tipoActual = tipo;
+      var caso = CASOS[casoActual];
+
+      document.getElementById('btn-rgb').classList.toggle('activo', tipo === 'rgb');
+      document.getElementById('btn-swir').classList.toggle('activo', tipo === 'swir');
+
+      // Reemplazar capas manteniendo el slider
+      if (sliderLayerIzq) mapa.removeLayer(sliderLayerIzq);
+      if (sliderLayerDer) mapa.removeLayer(sliderLayerDer);
+      if (sliderControl) { sliderControl.remove(); sliderControl = null; }
+
+      sliderLayerIzq = crearCapaSentinelHist(caso.pre, tipo);
+      sliderLayerDer = crearCapaSentinelHist(caso.post, tipo);
+
+      sliderLayerIzq.addTo(mapa);
+      sliderLayerDer.addTo(mapa);
+
+      if (L.control.sideBySide) {
+        sliderControl = L.control.sideBySide(sliderLayerIzq, sliderLayerDer).addTo(mapa);
+      }
+    }
+
+    function cerrarSlider(silencioso) {
+      if (sliderControl) { sliderControl.remove(); sliderControl = null; }
+      if (sliderLayerIzq) { mapa.removeLayer(sliderLayerIzq); sliderLayerIzq = null; }
+      if (sliderLayerDer) { mapa.removeLayer(sliderLayerDer); sliderLayerDer = null; }
+      casoActual = null;
+      document.querySelectorAll('.caso-card').forEach(function(c) { c.classList.remove('activo'); });
+      if (!silencioso) {
+        document.getElementById('slider-panel').classList.remove('visible');
+        document.getElementById('btn-historico').classList.remove('activo');
+      }
+    }
+
+    window.abrirCaso = abrirCaso;
+    window.cerrarSlider = cerrarSlider;
+    window.cambiarTipoSlider = cambiarTipoSlider;
+    window.toggleHistorico = toggleHistorico;
+
+    cargarDatos();
+  </script>
+
+</body>
+</html>
