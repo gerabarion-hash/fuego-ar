@@ -590,25 +590,41 @@
         <div class="caso-nombre">🔥 Los Manzanos</div>
         <div class="caso-lugar">PN Nahuel Huapi · Río Negro</div>
         <div class="caso-ha">~11.475 ha afectadas</div>
-        <div class="caso-fechas">Inicio: <span>25 dic 2024</span> (rayo)<br>Pre: <span>18 nov 2024</span> · Post: <span>13 feb 2025</span></div>
+        <div class="caso-fechas">
+          Inicio: <span>25 dic 2024</span> · Causa: <span>rayo</span><br>
+          Detenido: <span>mar 2025</span> (70 días de combate)<br>
+          Imágenes: <span>29 ene</span> (durante) · <span>13 feb 2025</span> (post)
+        </div>
       </div>
       <div class="caso-card" onclick="abrirCaso('lanin')">
         <div class="caso-nombre">🔥 Lanín / Valle Magdalena</div>
         <div class="caso-lugar">PN Lanín · Neuquén</div>
         <div class="caso-ha">~24.100 ha afectadas</div>
-        <div class="caso-fechas">Inicio: <span>1 ene 2025</span><br>Pre: <span>25 dic 2024</span> · Post: <span>21 feb 2025</span></div>
+        <div class="caso-fechas">
+          Inicio: <span>30 ene 2025</span> · Causa: <span>en investigación</span><br>
+          Contenido: <span>3 mar 2025</span> · Extinguido: <span>23 abr 2025</span><br>
+          Imágenes: <span>1 feb</span> (durante) · <span>21 feb 2025</span> (post)
+        </div>
       </div>
       <div class="caso-card" onclick="abrirCaso('madryn')">
         <div class="caso-nombre">🔥 Puerto Madryn</div>
         <div class="caso-lugar">Estepa costera · Chubut</div>
         <div class="caso-ha">Estepa patagónica</div>
-        <div class="caso-fechas">Inicio: <span>ene 2025</span><br>Pre: <span>3 ene 2025</span> · Post: <span>4 feb 2025</span></div>
+        <div class="caso-fechas">
+          Inicio: <span>ene 2025</span> · Causa: <span>en investigación</span><br>
+          Controlado: <span>feb 2025</span><br>
+          Imágenes: <span>30 ene</span> (durante) · <span>4 feb 2025</span> (post)
+        </div>
       </div>
       <div class="caso-card" onclick="abrirCaso('alerces')">
         <div class="caso-nombre">🔥 Los Alerces "El Centinela"</div>
         <div class="caso-lugar">PN Los Alerces · Chubut</div>
         <div class="caso-ha">~6.924 ha dentro del parque</div>
-        <div class="caso-fechas">Inicio: <span>9 dic 2025</span> (rayo)<br>Pre: <span>3 nov 2025</span> · Post: <span>21 feb 2026</span></div>
+        <div class="caso-fechas">
+          Inicio: <span>9 dic 2025</span> · Causa: <span>rayo</span><br>
+          Controlado: <span>feb 2026</span><br>
+          Imágenes: <span>4 ene 2026</span> (durante) · <span>21 feb 2026</span> (post)
+        </div>
       </div>
     </div>
   </div>
@@ -649,21 +665,13 @@
     </label>
 
     <div class="filtro-titulo">Potencia Radiativa del Fuego (FRP)</div>
-    <div class="filtro-desc">
-      El FRP mide la energía infrarroja que emite el incendio, expresada en <strong style="color:#ff6b35">megawatts (MW)</strong>. A mayor FRP, más intenso y activo es el fuego.
-      Subir este umbral filtra focos pequeños o de baja intensidad — útil para enfocarte en incendios forestales relevantes y descartar quemas agrícolas menores.
-    </div>
+    <div class="filtro-desc">Energía en megawatts (MW) que emite el incendio. Subir el umbral descarta quemas menores y muestra solo incendios relevantes.</div>
     <div class="frp-row">
       <span>Mostrar focos con FRP mayor a</span>
       <span><span id="frp-valor">0</span> MW</span>
     </div>
     <input type="range" id="frp-slider" min="0" max="200" value="0"
       oninput="document.getElementById('frp-valor').textContent = this.value">
-    <div class="frp-escala">
-      <div class="frp-tag">0–10 MW<br><span style="opacity:.5">quema chica</span></div>
-      <div class="frp-tag">10–50 MW<br><span style="opacity:.5">forestal activo</span></div>
-      <div class="frp-tag">&gt;100 MW<br><span style="opacity:.5">incendio severo</span></div>
-    </div>
 
     <div class="filtro-titulo">Fecha específica</div>
     <div class="fecha-row">
@@ -1220,28 +1228,48 @@
     // ── CASOS HISTÓRICOS ─────────────────────────────────────────────────────
     var CASOS = {
       manzanos: {
-        nombre: 'Los Manzanos — PN Nahuel Huapi',
+        nombre: 'Los Manzanos',
+        lugar: 'PN Nahuel Huapi · Río Negro',
+        ha: '~11.475 ha',
+        inicio: '25 dic 2024',
+        fin: 'Detenido mar 2025 (70 días)',
+        causa: 'Rayo en tormenta eléctrica',
         lat: -41.497, lng: -71.661, zoom: 11,
-        dur:  '2025-01-29',  // S2B_MSIL2A_20250129T142719
-        post: '2025-02-13'   // S2C_MSIL2A_20250213T142821
+        dur:  { fecha: '2025-01-29', label: '29 ene 2025', ventana: 2 },
+        post: { fecha: '2025-02-13', label: '13 feb 2025', ventana: 2 }
       },
       lanin: {
         nombre: 'Lanín / Valle Magdalena',
+        lugar: 'PN Lanín · Neuquén',
+        ha: '~24.100 ha',
+        inicio: '30 ene 2025',
+        fin: 'Contenido 3 mar 2025 · Extinguido 23 abr 2025',
+        causa: 'Causa en investigación',
         lat: -39.553, lng: -71.219, zoom: 11,
-        dur:  '2025-02-01',  // S2B_MSIL2A_20250201T143749
-        post: '2025-02-21'   // S2B_MSIL2A_20250221T143749
+        dur:  { fecha: '2025-02-01', label: '1 feb 2025', ventana: 3 },
+        post: { fecha: '2025-02-21', label: '21 feb 2025', ventana: 3 }
       },
       madryn: {
-        nombre: 'Puerto Madryn — Estepa Chubut',
+        nombre: 'Puerto Madryn',
+        lugar: 'Estepa costera · Chubut',
+        ha: 'Estepa patagónica',
+        inicio: 'Ene 2025',
+        fin: 'Feb 2025',
+        causa: 'Investigación en curso',
         lat: -42.305, lng: -65.008, zoom: 12,
-        dur:  '2025-01-30',  // S2B_MSIL2A_20250130T135709
-        post: '2025-02-04'   // S2C_MSIL2A_20250204T135731
+        dur:  { fecha: '2025-01-30', label: '30 ene 2025', ventana: 2 },
+        post: { fecha: '2025-02-04', label: '4 feb 2025', ventana: 2 }
       },
       alerces: {
         nombre: 'Los Alerces "El Centinela"',
+        lugar: 'PN Los Alerces · Chubut',
+        ha: '~6.924 ha dentro del parque',
+        inicio: '9 dic 2025',
+        fin: 'Controlado feb 2026',
+        causa: 'Rayo en tormenta eléctrica',
         lat: -42.830, lng: -71.780, zoom: 11,
-        dur:  '2026-01-04',  // S2B_MSIL2A_20260104T142709
-        post: '2026-02-21'   // S2C_MSIL2A_20260221T143751
+        dur:  { fecha: '2026-01-04', label: '4 ene 2026', ventana: 2 },
+        post: { fecha: '2026-02-21', label: '21 feb 2026', ventana: 2 }
       }
     };
 
@@ -1260,15 +1288,17 @@
       document.getElementById('faq-overlay').classList.remove('visible');
     }
 
-    // Crea una capa WMS Sentinel-2 con fecha exacta y sin bounds (evita tiles negros)
-    function crearCapaSentinelHist(fecha, tipo) {
+    // Crea una capa WMS Sentinel-2. ventana = días de margen para mosaiquear tiles adyacentes
+    function crearCapaSentinelHist(fechaObj, tipo) {
       var layerName = tipo === 'swir' ? 'SWIR' : 'TRUE_COLOR';
+      var desde = addDays(fechaObj.fecha, -fechaObj.ventana);
+      var hasta = addDays(fechaObj.fecha,  fechaObj.ventana);
       return L.tileLayer.wms(
         'https://sh.dataspace.copernicus.eu/ogc/wms/' + INSTANCE_ID, {
           layers: layerName,
           format: 'image/jpeg',
           transparent: false,
-          time: fecha + 'T00:00:00.000Z/' + fecha + 'T23:59:59.000Z',
+          time: desde + 'T00:00:00.000Z/' + hasta + 'T23:59:59.000Z',
           maxcc: 100,
           tileSize: 512,
           MOSAICKING_ORDER: 'mostRecentPixel',
@@ -1302,9 +1332,9 @@
       document.getElementById('btn-swir').classList.remove('activo');
 
       // Actualizar info del panel
-      document.getElementById('slider-nombre').textContent = caso.nombre;
+      document.getElementById('slider-nombre').textContent = caso.nombre + ' · ' + caso.lugar;
       document.getElementById('slider-fechas').textContent =
-        '🔥 Durante: ' + formatFecha(caso.dur) + '  ·  📍 Post: ' + formatFecha(caso.post);
+        '🔥 Durante: ' + caso.dur.label + '  ·  📍 Post: ' + caso.post.label;
 
       // Marcar card activa
       document.querySelectorAll('.caso-card').forEach(function(c) { c.classList.remove('activo'); });
@@ -1326,22 +1356,26 @@
           if (capaDur) { mapa.removeLayer(capaDur); capaDur = null; }
           durActiva = false;
           document.getElementById('btn-dur').classList.remove('activo');
+          document.getElementById('btn-dur').textContent = '🔥 Durante';
         } else {
           capaDur = crearCapaSentinelHist(caso.dur, tipoActual);
           capaDur.addTo(mapa);
           durActiva = true;
           document.getElementById('btn-dur').classList.add('activo');
+          document.getElementById('btn-dur').textContent = '🔥 ' + caso.dur.label;
         }
       } else if (cual === 'post') {
         if (postActiva) {
           if (capaPost) { mapa.removeLayer(capaPost); capaPost = null; }
           postActiva = false;
           document.getElementById('btn-post').classList.remove('activo');
+          document.getElementById('btn-post').textContent = '📍 Post-fuego';
         } else {
           capaPost = crearCapaSentinelHist(caso.post, tipoActual);
           capaPost.addTo(mapa);
           postActiva = true;
           document.getElementById('btn-post').classList.add('activo');
+          document.getElementById('btn-post').textContent = '📍 ' + caso.post.label;
         }
       }
     }
@@ -1355,7 +1389,6 @@
       document.getElementById('btn-rgb').classList.toggle('activo', tipo === 'rgb');
       document.getElementById('btn-swir').classList.toggle('activo', tipo === 'swir');
 
-      // Recrear solo las capas que estaban activas
       if (durActiva) {
         if (capaDur) mapa.removeLayer(capaDur);
         capaDur = crearCapaSentinelHist(caso.dur, tipo);
