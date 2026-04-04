@@ -449,9 +449,10 @@
       backdrop-filter: blur(12px);
       border: 1px solid rgba(255,255,255,0.1);
       border-radius: 12px;
-      z-index: 1002;
+      z-index: 1500;
       padding: 20px;
       display: none;
+      pointer-events: all;
     }
     #panel-historico.visible { display: block; }
 
@@ -479,6 +480,7 @@
       padding: 14px;
       cursor: pointer;
       transition: border-color .2s, background .2s;
+      pointer-events: all;
     }
     .caso-card:hover { border-color: #ff4500; background: rgba(255,69,0,0.07); }
     .caso-card.activo { border-color: #ff4500; background: rgba(255,69,0,0.1); }
@@ -1276,18 +1278,20 @@
     }
 
     function abrirCaso(id) {
+      console.log('abrirCaso llamado con id:', id);
+
+      // Limpiar capas anteriores ANTES de setear casoActual
+      cerrarSlider(true);
+
       var caso = CASOS[id];
       if (!caso) return;
       casoActual = id;
       tipoActual = 'rgb';
+      console.log('casoActual seteado a:', casoActual);
 
       document.getElementById('panel-historico').classList.remove('visible');
       document.getElementById('btn-historico').classList.remove('activo');
-
       mapa.setView([caso.lat, caso.lng], caso.zoom);
-
-      // Limpiar capas anteriores
-      cerrarSlider(true);
 
       // Resetear estado de botones
       durActiva  = false;
@@ -1314,6 +1318,7 @@
     // Toggle individual de cada capa (durante / post)
     function toggleCapa(cual) {
       var caso = CASOS[casoActual];
+      console.log('toggleCapa llamado:', cual, '| casoActual:', casoActual, '| caso:', caso);
       if (!caso) return;
 
       if (cual === 'dur') {
@@ -1381,6 +1386,15 @@
     window.cambiarTipoSlider = cambiarTipoSlider;
     window.toggleHistorico = toggleHistorico;
     window.toggleCapa = toggleCapa;
+
+    // Evitar que Leaflet capture los clicks de todos los paneles
+    ['slider-panel', 'panel-historico', 'panel-filtros', 'sentinel-panel', 'faq-overlay'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) {
+        L.DomEvent.disableClickPropagation(el);
+        L.DomEvent.disableScrollPropagation(el);
+      }
+    });
 
     cargarDatos();
   </script>
