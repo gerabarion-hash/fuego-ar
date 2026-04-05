@@ -573,7 +573,7 @@
 
   <!-- ── HEADER ────────────────────────────────────────────────────────────── -->
   <div id="header">
-    <div id="logo">🔥 <span>FUEGO</span>AR</div>
+    <a href="https://gerabarion-hash.github.io/fuego-ar/" id="logo" style="text-decoration:none;">🔥 <span>FUEGO</span>AR</a>
     <button id="btn-filtros" onclick="toggleFiltros()">⚙ Filtros</button>
     <button id="btn-toggle-focos" onclick="toggleFocos()">🔥 Ocultar focos</button>
     <button id="btn-historico" onclick="toggleHistorico()">📂 Casos históricos</button>
@@ -591,7 +591,7 @@
         <div class="caso-lugar">PN Nahuel Huapi · Río Negro</div>
         <div class="caso-ha">~11.475 ha afectadas</div>
         <div class="caso-fechas">
-          Inicio: <span>25 dic 2024</span> · Causa: <span>rayo</span><br>
+          Inicio: <span>25 dic 2024</span><br>
           Detenido: <span>mar 2025</span> (70 días de combate)<br>
           Imágenes: <span>29 ene</span> (durante) · <span>13 feb 2025</span> (post)
         </div>
@@ -601,9 +601,9 @@
         <div class="caso-lugar">PN Lanín · Neuquén</div>
         <div class="caso-ha">~24.100 ha afectadas</div>
         <div class="caso-fechas">
-          Inicio: <span>30 ene 2025</span> · Causa: <span>en investigación</span><br>
+          Inicio: <span>30 ene 2025</span><br>
           Contenido: <span>3 mar 2025</span> · Extinguido: <span>23 abr 2025</span><br>
-          Imágenes: <span>1 feb</span> (durante) · <span>21 feb 2025</span> (post)
+          Imágenes: <span>1 feb</span> (durante) · <span>13 mar 2025</span> (post)
         </div>
       </div>
       <div class="caso-card" onclick="abrirCaso('madryn')">
@@ -611,19 +611,19 @@
         <div class="caso-lugar">Estepa costera · Chubut</div>
         <div class="caso-ha">Estepa patagónica</div>
         <div class="caso-fechas">
-          Inicio: <span>ene 2025</span> · Causa: <span>en investigación</span><br>
+          Inicio: <span>ene 2025</span><br>
           Controlado: <span>feb 2025</span><br>
           Imágenes: <span>30 ene</span> (durante) · <span>4 feb 2025</span> (post)
         </div>
       </div>
       <div class="caso-card" onclick="abrirCaso('alerces')">
-        <div class="caso-nombre">🔥 Los Alerces "El Centinela"</div>
+        <div class="caso-nombre">🔥 PN Los Alerces</div>
         <div class="caso-lugar">PN Los Alerces · Chubut</div>
         <div class="caso-ha">~6.924 ha dentro del parque</div>
         <div class="caso-fechas">
-          Inicio: <span>9 dic 2025</span> · Causa: <span>rayo</span><br>
+          Inicio: <span>9 dic 2025</span><br>
           Controlado: <span>feb 2026</span><br>
-          Imágenes: <span>4 ene 2026</span> (durante) · <span>21 feb 2026</span> (post)
+          Imágenes: <span>4 ene 2026</span> (durante) · <span>15 mar 2026</span> (post)
         </div>
       </div>
     </div>
@@ -1230,10 +1230,6 @@
       manzanos: {
         nombre: 'Los Manzanos',
         lugar: 'PN Nahuel Huapi · Río Negro',
-        ha: '~11.475 ha',
-        inicio: '25 dic 2024',
-        fin: 'Detenido mar 2025 (70 días)',
-        causa: 'Rayo en tormenta eléctrica',
         lat: -41.497, lng: -71.661, zoom: 11,
         dur:  { fecha: '2025-01-29', label: '29 ene 2025', ventana: 2 },
         post: { fecha: '2025-02-13', label: '13 feb 2025', ventana: 2 }
@@ -1241,35 +1237,23 @@
       lanin: {
         nombre: 'Lanín / Valle Magdalena',
         lugar: 'PN Lanín · Neuquén',
-        ha: '~24.100 ha',
-        inicio: '30 ene 2025',
-        fin: 'Contenido 3 mar 2025 · Extinguido 23 abr 2025',
-        causa: 'Causa en investigación',
         lat: -39.553, lng: -71.219, zoom: 11,
         dur:  { fecha: '2025-02-01', label: '1 feb 2025', ventana: 3 },
-        post: { fecha: '2025-02-21', label: '21 feb 2025', ventana: 3 }
+        post: { fecha: '2025-03-13', label: '13 mar 2025', ventana: 3 }
       },
       madryn: {
         nombre: 'Puerto Madryn',
         lugar: 'Estepa costera · Chubut',
-        ha: 'Estepa patagónica',
-        inicio: 'Ene 2025',
-        fin: 'Feb 2025',
-        causa: 'Investigación en curso',
         lat: -42.305, lng: -65.008, zoom: 12,
         dur:  { fecha: '2025-01-30', label: '30 ene 2025', ventana: 2 },
         post: { fecha: '2025-02-04', label: '4 feb 2025', ventana: 2 }
       },
       alerces: {
-        nombre: 'Los Alerces "El Centinela"',
+        nombre: 'PN Los Alerces',
         lugar: 'PN Los Alerces · Chubut',
-        ha: '~6.924 ha dentro del parque',
-        inicio: '9 dic 2025',
-        fin: 'Controlado feb 2026',
-        causa: 'Rayo en tormenta eléctrica',
         lat: -42.830, lng: -71.780, zoom: 11,
         dur:  { fecha: '2026-01-04', label: '4 ene 2026', ventana: 2 },
-        post: { fecha: '2026-02-21', label: '21 feb 2026', ventana: 2 }
+        post: { fecha: '2026-03-15', label: '15 mar 2026', ventana: 5 }
       }
     };
 
@@ -1360,6 +1344,7 @@
         } else {
           capaDur = crearCapaSentinelHist(caso.dur, tipoActual);
           capaDur.addTo(mapa);
+          capaDur.bringToFront();
           durActiva = true;
           document.getElementById('btn-dur').classList.add('activo');
           document.getElementById('btn-dur').textContent = '🔥 ' + caso.dur.label;
@@ -1373,6 +1358,7 @@
         } else {
           capaPost = crearCapaSentinelHist(caso.post, tipoActual);
           capaPost.addTo(mapa);
+          capaPost.bringToFront();
           postActiva = true;
           document.getElementById('btn-post').classList.add('activo');
           document.getElementById('btn-post').textContent = '📍 ' + caso.post.label;
@@ -1393,11 +1379,13 @@
         if (capaDur) mapa.removeLayer(capaDur);
         capaDur = crearCapaSentinelHist(caso.dur, tipo);
         capaDur.addTo(mapa);
+        capaDur.bringToFront();
       }
       if (postActiva) {
         if (capaPost) mapa.removeLayer(capaPost);
         capaPost = crearCapaSentinelHist(caso.post, tipo);
         capaPost.addTo(mapa);
+        capaPost.bringToFront();
       }
     }
 
