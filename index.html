@@ -336,21 +336,21 @@
     }
     .share-icons { display: flex; gap: 6px; }
     .share-icon-btn {
-      width: 32px; height: 32px;
+      width: 26px; height: 26px;
       border-radius: 50%;
       border: none;
       cursor: pointer;
       display: flex; align-items: center; justify-content: center;
-      font-size: 15px;
       transition: transform .15s, opacity .15s;
       text-decoration: none;
       flex-shrink: 0;
+      padding: 0;
     }
-    .share-icon-btn:hover { transform: scale(1.15); opacity: .9; }
+    .share-icon-btn:hover { transform: scale(1.18); opacity: .9; }
     .share-fb   { background: #1877F2; }
     .share-wa   { background: #25D366; }
     .share-ig   { background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045); }
-    .share-link { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); }
+    .share-link { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); }
 
     .share-copied {
       font-size: 10px; color: #25D366;
@@ -944,7 +944,8 @@
     // ── Compartir — funciones inline ──────────────────────────────────────
     function compartirWA(lat, lng, frp, fecha) {
       var url = 'https://gerabarion-hash.github.io/fuego-ar/?lat=' + lat.toFixed(4) + '&lng=' + lng.toFixed(4) + '&z=12';
-      var txt = '🔥 Foco activo NASA · ' + lat.toFixed(3) + ', ' + lng.toFixed(3) + ' · FRP ' + frp.toFixed(0) + ' MW · ' + fecha + ' · ' + url + ' via FuegoAR';
+      // La URL va al final, separada — así WhatsApp no la rompe con "via FuegoAR"
+      var txt = '🔥 *Foco activo detectado por NASA*\n📍 ' + lat.toFixed(3) + ', ' + lng.toFixed(3) + '\n⚡ FRP: ' + frp.toFixed(0) + ' MW · ' + fecha + '\n🛰 Ver en FuegoAR:\n' + url;
       window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank');
     }
     function compartirFB(lat, lng) {
@@ -953,7 +954,7 @@
     }
     function compartirIG(lat, lng, frp, fecha, btnEl) {
       var url = 'https://gerabarion-hash.github.io/fuego-ar/?lat=' + lat.toFixed(4) + '&lng=' + lng.toFixed(4) + '&z=12';
-      var txt = '🔥 Foco activo detectado por satélite NASA\n📍 ' + lat.toFixed(3) + ', ' + lng.toFixed(3) + '\n⚡ ' + frp.toFixed(0) + ' MW · ' + fecha + '\n🛰 FuegoAR — ' + url + '\n#incendio #argentina #satelite #NASA';
+      var txt = '🔥 Foco activo detectado por satélite NASA\n📍 ' + lat.toFixed(3) + ', ' + lng.toFixed(3) + '\n⚡ ' + frp.toFixed(0) + ' MW · ' + fecha + '\n🛰 FuegoAR:\n' + url + '\n#incendio #argentina #satelite #NASA #VIIRS';
       navigator.clipboard.writeText(txt).then(function() {
         var fb = btnEl.closest('.popup-share-row').querySelector('.share-copied');
         if (fb) { fb.textContent = '✓ Copiado'; fb.classList.add('visible'); setTimeout(function(){ fb.classList.remove('visible'); }, 2500); }
@@ -963,7 +964,7 @@
       var url = 'https://gerabarion-hash.github.io/fuego-ar/?lat=' + lat.toFixed(4) + '&lng=' + lng.toFixed(4) + '&z=12';
       navigator.clipboard.writeText(url).then(function() {
         var fb = btnEl.closest('.popup-share-row').querySelector('.share-copied');
-        if (fb) { fb.textContent = '✓ Enlace copiado'; fb.classList.add('visible'); setTimeout(function(){ fb.classList.remove('visible'); }, 2500); }
+        if (fb) { fb.textContent = '✓ Copiado'; fb.classList.add('visible'); setTimeout(function(){ fb.classList.remove('visible'); }, 2500); }
       });
     }
     window.compartirWA = compartirWA;
@@ -1019,6 +1020,18 @@
 
     // ── Sentinel: cargar capa WMS ─────────────────────────────────────────────
     function cargarCapaSentinel(lat, lng, fechaImg, tipo, aplicarZoom) {
+      // Si el botón clickeado ya está activo → desactivar la capa (toggle off)
+      var btnActivo = document.querySelector('.btn-fecha-sentinel.activo');
+      if (btnActivo && btnActivo.dataset.fecha === fechaImg) {
+        controlCapas.removeLayer(capaSentinel);
+        mapa.removeLayer(capaSentinel);
+        capaSentinel = null;
+        btnActivo.classList.remove('activo');
+        document.getElementById('sentinel-tipo-txt').textContent =
+          tipo === 'swir' ? '🔴 Sentinel SWIR' : '🛰 Sentinel Color';
+        return;
+      }
+
       if (capaSentinel) {
         controlCapas.removeLayer(capaSentinel);
         mapa.removeLayer(capaSentinel);
@@ -1306,10 +1319,18 @@
             '<div class="popup-share-row">' +
               '<span class="popup-share-label">Compartir</span>' +
               '<div class="share-icons">' +
-                '<button class="share-icon-btn share-fb" title="Facebook" onclick="compartirFB(' + lat + ',' + lng + ')">f</button>' +
-                '<button class="share-icon-btn share-wa" title="WhatsApp" onclick="compartirWA(' + lat + ',' + lng + ',' + frp + ',\'' + fecha + '\')">&#128172;</button>' +
-                '<button class="share-icon-btn share-ig" title="Instagram (copiar texto)" onclick="compartirIG(' + lat + ',' + lng + ',' + frp + ',\'' + fecha + '\',this)">&#127916;</button>' +
-                '<button class="share-icon-btn share-link" title="Copiar enlace" onclick="compartirLink(' + lat + ',' + lng + ',this)">&#128279;</button>' +
+                '<button class="share-icon-btn share-fb" title="Facebook" onclick="compartirFB(' + lat + ',' + lng + ')">' +
+                  '<svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>' +
+                '</button>' +
+                '<button class="share-icon-btn share-wa" title="WhatsApp" onclick="compartirWA(' + lat + ',' + lng + ',' + frp + ',\'' + fecha + '\')">' +
+                  '<svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>' +
+                '</button>' +
+                '<button class="share-icon-btn share-ig" title="Instagram (copiar texto)" onclick="compartirIG(' + lat + ',' + lng + ',' + frp + ',\'' + fecha + '\',this)">' +
+                  '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="white" stroke="none"/></svg>' +
+                '</button>' +
+                '<button class="share-icon-btn share-link" title="Copiar enlace" onclick="compartirLink(' + lat + ',' + lng + ',this)">' +
+                  '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>' +
+                '</button>' +
               '</div>' +
               '<span class="share-copied"></span>' +
             '</div>'
