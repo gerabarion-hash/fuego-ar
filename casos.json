@@ -1,0 +1,38 @@
+{
+  "manzanos": {
+    "nombre": "Los Manzanos",
+    "lugar": "PN Nahuel Huapi · Río Negro",
+    "lat": -41.497,
+    "lng": -71.661,
+    "zoom": 11,
+    "dur":  { "fecha": "2025-01-29", "label": "29 ene 2025", "ventana": 2 },
+    "post": { "fecha": "2025-02-13", "label": "13 feb 2025", "ventana": 2 }
+  },
+  "lanin": {
+    "nombre": "Lanín / Valle Magdalena",
+    "lugar": "PN Lanín · Neuquén",
+    "lat": -39.553,
+    "lng": -71.219,
+    "zoom": 11,
+    "dur":  { "fecha": "2025-02-01", "label": "1 feb 2025", "ventana": 3 },
+    "post": { "fecha": "2025-03-13", "label": "13 mar 2025", "ventana": 3 }
+  },
+  "madryn": {
+    "nombre": "Puerto Madryn",
+    "lugar": "Estepa costera · Chubut",
+    "lat": -42.305,
+    "lng": -65.008,
+    "zoom": 12,
+    "dur":  { "fecha": "2025-01-30", "label": "30 ene 2025", "ventana": 2 },
+    "post": { "fecha": "2025-02-04", "label": "4 feb 2025", "ventana": 2 }
+  },
+  "alerces": {
+    "nombre": "PN Los Alerces",
+    "lugar": "PN Los Alerces · Chubut",
+    "lat": -42.830,
+    "lng": -71.780,
+    "zoom": 11,
+    "dur":  { "fecha": "2026-01-04", "label": "4 ene 2026", "ventana": 2 },
+    "post": { "fecha": "2026-02-05", "label": "5 feb 2026", "ventana": 5 }
+  }
+}

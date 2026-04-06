@@ -43,6 +43,36 @@
     #contador-header { font-size: 13px; color: rgba(255,255,255,0.5); margin-left: auto; white-space: nowrap; }
     #contador-header strong { color: #ff6b35; font-size: 15px; }
 
+    /* Botones nav ocultos en mobile */
+    #nav-btns {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #btn-menu-mobile {
+      display: none;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #e8e8e8;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 18px;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    @media (max-width: 680px) {
+      #nav-btns { display: none; }
+      #nav-btns.open { display: flex; flex-direction: column; align-items: stretch;
+        position: absolute; top: 52px; left: 0; right: 0;
+        background: rgba(13,13,13,0.97); padding: 10px 16px; gap: 6px;
+        border-bottom: 1px solid rgba(255,255,255,0.08); z-index: 1002; }
+      #btn-menu-mobile { display: block; }
+      #contador-header { display: none; }
+      #nav-btns button { width: 100%; text-align: left; }
+    }
+
     #btn-filtros, #btn-toggle-focos, #btn-faq {
       background: rgba(255,255,255,0.08);
       border: 1px solid rgba(255,255,255,0.15);
@@ -421,6 +451,39 @@
     .tag-datos { background: rgba(255,170,0,0.15); color: #ffaa00; }
     .tag-uso { background: rgba(100,200,100,0.15); color: #80e080; }
 
+
+    /* ── LEYENDA ─────────────────────────────────────────────────────────── */
+    #leyenda {
+      position: absolute;
+      bottom: 32px; left: 16px;
+      background: rgba(13,13,13,0.88);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      padding: 10px 14px;
+      z-index: 1000;
+      pointer-events: none;
+    }
+    .ley-titulo {
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: 10px; font-weight: 600;
+      letter-spacing: .08em; text-transform: uppercase;
+      color: rgba(255,255,255,0.35); margin-bottom: 7px;
+    }
+    .ley-fila {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 11px; color: rgba(255,255,255,0.6); margin-bottom: 5px;
+    }
+    .ley-fila:last-child { margin-bottom: 0; }
+    .ley-dot { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.3); flex-shrink: 0; }
+    .ley-sep { margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.06); }
+
+    /* ── LOADING HISTÓRICO ───────────────────────────────────────────────── */
+    #hist-loading { display: none; font-size: 11px; color: rgba(255,255,255,0.4); align-items: center; gap: 6px; }
+    #hist-loading.visible { display: flex; }
+    .spin { width: 12px; height: 12px; border: 2px solid rgba(255,255,255,0.15); border-top-color: #ff6b35; border-radius: 50%; animation: spin .7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
     /* ── BTN HISTÓRICO ───────────────────────────────────────────────────── */
     #btn-historico {
       background: rgba(255,69,0,0.15);
@@ -574,10 +637,13 @@
   <!-- ── HEADER ────────────────────────────────────────────────────────────── -->
   <div id="header">
     <a href="https://gerabarion-hash.github.io/fuego-ar/" id="logo" style="text-decoration:none;">🔥 <span>FUEGO</span>AR</a>
-    <button id="btn-filtros" onclick="toggleFiltros()">⚙ Filtros</button>
-    <button id="btn-toggle-focos" onclick="toggleFocos()">🔥 Ocultar focos</button>
-    <button id="btn-historico" onclick="toggleHistorico()">📂 Casos históricos</button>
-    <button id="btn-faq" onclick="toggleFaq()">? FAQ</button>
+    <button id="btn-menu-mobile" onclick="toggleMenuMobile()">☰</button>
+    <div id="nav-btns">
+      <button id="btn-filtros" onclick="toggleFiltros()">⚙ Filtros</button>
+      <button id="btn-toggle-focos" onclick="toggleFocos()">🔥 Ocultar focos</button>
+      <button id="btn-historico" onclick="toggleHistorico()">📂 Casos históricos</button>
+      <button id="btn-faq" onclick="toggleFaq()">? FAQ</button>
+    </div>
     <div id="contador-header">Focos: <strong id="num-focos">—</strong></div>
   </div>
 
@@ -629,12 +695,29 @@
     </div>
   </div>
 
+  <!-- ── LEYENDA ───────────────────────────────────────────────────────────── -->
+  <div id="leyenda">
+    <div class="ley-titulo">Confiabilidad del foco</div>
+    <div class="ley-fila"><span class="ley-dot" style="background:rgba(255,69,0,0.3);border-color:#ff4500;"></span>Alta</div>
+    <div class="ley-fila"><span class="ley-dot" style="background:rgba(255,170,0,0.3);border-color:#ffaa00;"></span>Nominal</div>
+    <div class="ley-fila"><span class="ley-dot" style="background:rgba(200,200,200,0.15);border-color:rgba(200,200,200,0.5);"></span>Baja</div>
+    <div class="ley-sep">
+      <div class="ley-titulo" style="margin-bottom:5px;">Intensidad (FRP)</div>
+      <div class="ley-fila">
+        <span class="ley-dot" style="width:8px;height:8px;background:rgba(255,69,0,0.15);border-color:#ff4500;"></span>Baja
+        <span class="ley-dot" style="width:12px;height:12px;background:rgba(255,69,0,0.15);border-color:#ff4500;"></span>Media
+        <span class="ley-dot" style="width:18px;height:18px;background:rgba(255,69,0,0.15);border-color:#ff4500;"></span>Alta
+      </div>
+    </div>
+  </div>
+
   <!-- ── PANEL CAPAS HISTÓRICAS ACTIVO ────────────────────────────────────── -->
   <div id="slider-panel">
     <div style="flex:1;min-width:0;">
       <div class="slider-caso-nombre" id="slider-nombre">—</div>
       <div class="slider-fechas" id="slider-fechas"></div>
     </div>
+    <div id="hist-loading"><div class="spin"></div>Cargando imagen...</div>
     <div class="slider-toggle-btns">
       <button class="btn-slider-tipo" id="btn-dur" onclick="toggleCapa('dur')">🔥 Durante</button>
       <button class="btn-slider-tipo" id="btn-post" onclick="toggleCapa('post')">📍 Post-fuego</button>
@@ -826,7 +909,22 @@
     var INSTANCE_ID = 'c87c1637-7fee-40c3-96fa-f9037b487389';
     var focoActualCompartir = null; // legacy — se puede quitar en próxima limpieza
 
-    // ── Helpers de fecha ──────────────────────────────────────────────────────
+    // ── Menú mobile ───────────────────────────────────────────────────────────
+    function toggleMenuMobile() {
+      document.getElementById('nav-btns').classList.toggle('open');
+    }
+    window.toggleMenuMobile = toggleMenuMobile;
+
+    // ── Permalink: leer ?lat=&lng=&z= al cargar ───────────────────────────────
+    (function() {
+      var params = new URLSearchParams(window.location.search);
+      var lat = parseFloat(params.get('lat'));
+      var lng = parseFloat(params.get('lng'));
+      var z   = parseInt(params.get('z')) || 13;
+      if (!isNaN(lat) && !isNaN(lng)) {
+        mapa.setView([lat, lng], z);
+      }
+    })();
     function formatFecha(iso) {
       var p = iso.split('-');
       return p[2] + '/' + p[1] + '/' + p[0];
@@ -1226,7 +1324,11 @@
     }
 
     // ── CASOS HISTÓRICOS ─────────────────────────────────────────────────────
-    var CASOS = {
+    // CASOS se carga desde casos.json (editable sin tocar código)
+    // Si el JSON no existe, usa el fallback inline
+    var CASOS = null;
+
+    var CASOS_FALLBACK = {
       manzanos: {
         nombre: 'Los Manzanos',
         lugar: 'PN Nahuel Huapi · Río Negro',
@@ -1253,9 +1355,15 @@
         lugar: 'PN Los Alerces · Chubut',
         lat: -42.830, lng: -71.780, zoom: 11,
         dur:  { fecha: '2026-01-04', label: '4 ene 2026', ventana: 2 },
-        post: { fecha: '2026-03-15', label: '15 mar 2026', ventana: 5 }
+        post: { fecha: '2026-02-05', label: '5 feb 2026', ventana: 5 }
       }
     };
+
+    // Cargar casos.json — si falla usa el fallback
+    fetch('casos.json')
+      .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
+      .then(function(data) { CASOS = data; console.log('✓ casos.json cargado'); })
+      .catch(function() { CASOS = CASOS_FALLBACK; console.log('casos.json no encontrado, usando fallback'); });
 
     var capaDur  = null;  // capa "durante el incendio"
     var capaPost = null;  // capa "post-fuego"
@@ -1292,6 +1400,7 @@
     }
 
     function abrirCaso(id) {
+      if (!CASOS) { console.warn('CASOS aún no cargado'); return; }
       console.log('abrirCaso llamado con id:', id);
 
       // Limpiar capas anteriores ANTES de setear casoActual
@@ -1342,9 +1451,11 @@
           document.getElementById('btn-dur').classList.remove('activo');
           document.getElementById('btn-dur').textContent = '🔥 Durante';
         } else {
+          document.getElementById('hist-loading').classList.add('visible');
           capaDur = crearCapaSentinelHist(caso.dur, tipoActual);
           capaDur.addTo(mapa);
           capaDur.bringToFront();
+          capaDur.on('load', function() { document.getElementById('hist-loading').classList.remove('visible'); });
           durActiva = true;
           document.getElementById('btn-dur').classList.add('activo');
           document.getElementById('btn-dur').textContent = '🔥 ' + caso.dur.label;
@@ -1356,9 +1467,11 @@
           document.getElementById('btn-post').classList.remove('activo');
           document.getElementById('btn-post').textContent = '📍 Post-fuego';
         } else {
+          document.getElementById('hist-loading').classList.add('visible');
           capaPost = crearCapaSentinelHist(caso.post, tipoActual);
           capaPost.addTo(mapa);
           capaPost.bringToFront();
+          capaPost.on('load', function() { document.getElementById('hist-loading').classList.remove('visible'); });
           postActiva = true;
           document.getElementById('btn-post').classList.add('activo');
           document.getElementById('btn-post').textContent = '📍 ' + caso.post.label;
