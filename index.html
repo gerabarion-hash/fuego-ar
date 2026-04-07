@@ -177,6 +177,24 @@
     }
     .nota { font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 4px; }
 
+    .dias-nav {
+      display: flex; gap: 5px; margin-top: 4px;
+    }
+    .btn-dia-nav {
+      flex: 1;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.6);
+      padding: 5px 4px;
+      border-radius: 5px;
+      font-size: 11px; font-weight: 600;
+      font-family: 'Barlow', sans-serif;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .btn-dia-nav:hover { background: rgba(255,69,0,0.18); border-color: #ff4500; color: #ff6b35; }
+    .btn-dia-hoy { color: rgba(255,255,255,0.35); }
+
     #btn-aplicar {
       margin-top: 14px;
       width: 100%;
@@ -760,6 +778,11 @@
     <div class="fecha-row">
       <label>Seleccioná un día para ver sus focos. Sin selección se cargan los focos recientes.</label>
       <input type="date" id="fecha-especifica">
+      <div class="dias-nav">
+        <button class="btn-dia-nav" onclick="moverDia(-1)">← −1 día</button>
+        <button class="btn-dia-nav" onclick="moverDia(1)">+1 día →</button>
+        <button class="btn-dia-nav btn-dia-hoy" onclick="limpiarFecha()">Hoy</button>
+      </div>
       <div class="nota">NASA FIRMS · VIIRS NOAA-20 y NOAA-21</div>
     </div>
 
@@ -916,13 +939,16 @@
     window.toggleMenuMobile = toggleMenuMobile;
 
     // ── Permalink: leer ?lat=&lng=&z= al cargar ───────────────────────────────
+    var permalinkActivo = false;
     (function() {
       var params = new URLSearchParams(window.location.search);
       var lat = parseFloat(params.get('lat'));
       var lng = parseFloat(params.get('lng'));
-      var z   = parseInt(params.get('z')) || 13;
+      var z   = parseInt(params.get('z')) || 12;
       if (!isNaN(lat) && !isNaN(lng)) {
-        mapa.setView([lat, lng], z);
+        permalinkActivo = true;
+        // Se aplica DESPUÉS de que cargarDatos() termine su setView inicial
+        setTimeout(function() { mapa.setView([lat, lng], z); }, 100);
       }
     })();
     function formatFecha(iso) {
@@ -972,7 +998,26 @@
     window.compartirIG = compartirIG;
     window.compartirLink = compartirLink;
 
-    // ── FAQ ───────────────────────────────────────────────────────────────────
+    // ── Navegación de días ────────────────────────────────────────────────────
+    function moverDia(delta) {
+      var input = document.getElementById('fecha-especifica');
+      var hoy = new Date().toISOString().split('T')[0];
+      // Si no hay fecha seleccionada, partir de hoy
+      var base = input.value || hoy;
+      var d = new Date(base);
+      d.setDate(d.getDate() + delta);
+      var nueva = d.toISOString().split('T')[0];
+      // No pasar de hoy
+      if (nueva > hoy) nueva = hoy;
+      input.value = nueva;
+      cargarDatos();
+    }
+    function limpiarFecha() {
+      document.getElementById('fecha-especifica').value = '';
+      cargarDatos();
+    }
+    window.moverDia = moverDia;
+    window.limpiarFecha = limpiarFecha;
     function toggleFaq() {
       document.getElementById('faq-overlay').classList.toggle('visible');
       document.getElementById('panel-filtros').classList.remove('visible');
@@ -1241,7 +1286,8 @@
     var capaFocos = L.layerGroup().addTo(mapa);
 
     function cargarDatos() {
-      mapa.setView([-38, -63], 4);
+      if (!permalinkActivo) mapa.setView([-38, -63], 4);
+      permalinkActivo = false; // solo la primera carga respeta el permalink
       cerrarSentinel();
 
       var fechaElegida = document.getElementById('fecha-especifica').value;
