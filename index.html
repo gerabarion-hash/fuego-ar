@@ -1597,13 +1597,6 @@
     var capaSeveridad = null;
     var sevActiva = false;
 
-    // Colormap discreto: 1-2 transparente, 3=amarillo, 4=naranja, 5=rojo, 6=rojo oscuro
-    var COLORMAP = encodeURIComponent(JSON.stringify({
-      "1": [0,0,0,0], "2": [0,0,0,0],
-      "3": [255,255,0,200], "4": [255,140,0,220],
-      "5": [255,50,0,230],  "6": [139,0,0,255]
-    }));
-
     function toggleSeveridad() {
       var caso = CASOS[casoActual];
       if (!caso || !caso.sev) return;
@@ -1614,10 +1607,20 @@
         sevActiva = false;
         btn.classList.remove('activo');
       } else {
-        var url = TITILER + '?url=' + R2 + '/' + caso.sev.archivo +
-          '&rescale=1,6&colormap=' + COLORMAP +
-          '&width=' + caso.sev.w + '&height=' + caso.sev.h;
-        capaSeveridad = L.imageOverlay(url, caso.sev.bounds, { opacity: 0.8, zIndex: 600 });
+        // colormap YlOrRd: amarillo (baja) → rojo oscuro (alta severidad)
+        var url = TITILER +
+          '?url=' + encodeURIComponent(R2 + '/' + caso.sev.archivo) +
+          '&rescale=3,6' +
+          '&colormap_name=YlOrRd' +
+          '&width=' + caso.sev.w +
+          '&height=' + caso.sev.h;
+
+        console.log('Cargando severidad:', url);
+
+        capaSeveridad = L.imageOverlay(url, caso.sev.bounds, {
+          opacity: 0.8,
+          zIndex: 600
+        });
         capaSeveridad.addTo(mapa);
         capaSeveridad.bringToFront();
         sevActiva = true;
