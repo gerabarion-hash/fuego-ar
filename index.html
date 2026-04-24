@@ -1527,6 +1527,7 @@
       if (cards[idx]) cards[idx].classList.add('activo');
 
       document.getElementById('slider-panel').classList.add('visible');
+      bloquearLeaflet();
     }
 
     // Toggle individual de cada capa (durante / post)
@@ -1651,13 +1652,17 @@
     window.toggleCapa = toggleCapa;
 
     // Evitar que Leaflet capture los clicks de todos los paneles
-    ['slider-panel', 'panel-historico', 'panel-filtros', 'sentinel-panel', 'faq-overlay'].forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el) {
-        L.DomEvent.disableClickPropagation(el);
-        L.DomEvent.disableScrollPropagation(el);
-      }
-    });
+    // Se aplica tanto al init como cuando se hace visible el slider-panel
+    function bloquearLeaflet() {
+      ['slider-panel', 'panel-historico', 'panel-filtros', 'sentinel-panel', 'faq-overlay'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) {
+          L.DomEvent.disableClickPropagation(el);
+          L.DomEvent.disableScrollPropagation(el);
+        }
+      });
+    }
+    bloquearLeaflet();
 
     cargarDatos();
   </script>
