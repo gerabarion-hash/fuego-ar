@@ -739,6 +739,7 @@
     <div class="slider-toggle-btns">
       <button class="btn-slider-tipo" id="btn-dur" onclick="toggleCapa('dur')">🔥 Durante</button>
       <button class="btn-slider-tipo" id="btn-post" onclick="toggleCapa('post')">📍 Post-fuego</button>
+      <button class="btn-slider-tipo" id="btn-sev" onclick="toggleSeveridad()" title="Mapa de severidad dNBR · clasificación USGS">🟥 Severidad</button>
     </div>
     <div class="slider-toggle-btns" style="border-left:1px solid rgba(255,255,255,0.1);padding-left:10px;">
       <button class="btn-slider-tipo activo" id="btn-rgb" onclick="cambiarTipoSlider('rgb')">RGB</button>
@@ -1395,34 +1396,57 @@
     // Si el JSON no existe, usa el fallback inline
     var CASOS = null;
 
+    var R2 = 'https://pub-626cdeb255ae4d8e91f24c683a1e6dfd.r2.dev';
+    var TITILER = 'https://titiler.xyz/cog/preview.png';
+
     var CASOS_FALLBACK = {
       manzanos: {
         nombre: 'Los Manzanos',
         lugar: 'PN Nahuel Huapi · Río Negro',
         lat: -41.497, lng: -71.661, zoom: 11,
         dur:  { fecha: '2025-01-29', label: '29 ene 2025', ventana: 2 },
-        post: { fecha: '2025-02-13', label: '13 feb 2025', ventana: 2 }
+        post: { fecha: '2025-02-13', label: '13 feb 2025', ventana: 2 },
+        sev: {
+          archivo: 'LosManzanos_Severidad_USGS.tif',
+          bounds: [[-41.661, -71.914], [-41.332, -71.410]],
+          w: 900, h: 589
+        }
       },
       lanin: {
         nombre: 'Lanín / Valle Magdalena',
         lugar: 'PN Lanín · Neuquén',
         lat: -39.553, lng: -71.219, zoom: 11,
         dur:  { fecha: '2025-02-01', label: '1 feb 2025', ventana: 3 },
-        post: { fecha: '2025-03-13', label: '13 mar 2025', ventana: 3 }
+        post: { fecha: '2025-03-13', label: '13 mar 2025', ventana: 3 },
+        sev: {
+          archivo: 'Lanin2025_Severidad_USGS.tif',
+          bounds: [[-39.669, -71.462], [-39.437, -70.978]],
+          w: 900, h: 431
+        }
       },
       madryn: {
         nombre: 'Puerto Madryn',
         lugar: 'Estepa costera · Chubut',
         lat: -42.305, lng: -65.008, zoom: 12,
         dur:  { fecha: '2025-01-30', label: '30 ene 2025', ventana: 2 },
-        post: { fecha: '2025-02-04', label: '4 feb 2025', ventana: 2 }
+        post: { fecha: '2025-02-04', label: '4 feb 2025', ventana: 2 },
+        sev: {
+          archivo: 'PuertoMadryn_Severidad_USGS.tif',
+          bounds: [[-42.492, -65.147], [-42.246, -64.883]],
+          w: 900, h: 839
+        }
       },
       alerces: {
         nombre: 'PN Los Alerces',
         lugar: 'PN Los Alerces · Chubut',
         lat: -42.830, lng: -71.780, zoom: 11,
         dur:  { fecha: '2026-01-04', label: '4 ene 2026', ventana: 2 },
-        post: { fecha: '2026-02-05', label: '5 feb 2026', ventana: 5 }
+        post: { fecha: '2026-02-05', label: '5 feb 2026', ventana: 5 },
+        sev: {
+          archivo: 'Alerces2025_Severidad_USGS.tif',
+          bounds: [[-43.300, -72.300], [-42.500, -71.300]],
+          w: 900, h: 720
+        }
       }
     };
 
@@ -1569,13 +1593,48 @@
       }
     }
 
+    // ── Capa de severidad USGS ────────────────────────────────────────────────
+    var capaSeveridad = null;
+    var sevActiva = false;
+
+    // Colormap discreto: 1-2 transparente, 3=amarillo, 4=naranja, 5=rojo, 6=rojo oscuro
+    var COLORMAP = encodeURIComponent(JSON.stringify({
+      "1": [0,0,0,0], "2": [0,0,0,0],
+      "3": [255,255,0,200], "4": [255,140,0,220],
+      "5": [255,50,0,230],  "6": [139,0,0,255]
+    }));
+
+    function toggleSeveridad() {
+      var caso = CASOS[casoActual];
+      if (!caso || !caso.sev) return;
+      var btn = document.getElementById('btn-sev');
+
+      if (sevActiva) {
+        if (capaSeveridad) { mapa.removeLayer(capaSeveridad); capaSeveridad = null; }
+        sevActiva = false;
+        btn.classList.remove('activo');
+      } else {
+        var url = TITILER + '?url=' + R2 + '/' + caso.sev.archivo +
+          '&rescale=1,6&colormap=' + COLORMAP +
+          '&width=' + caso.sev.w + '&height=' + caso.sev.h;
+        capaSeveridad = L.imageOverlay(url, caso.sev.bounds, { opacity: 0.8, zIndex: 600 });
+        capaSeveridad.addTo(mapa);
+        capaSeveridad.bringToFront();
+        sevActiva = true;
+        btn.classList.add('activo');
+      }
+    }
+    window.toggleSeveridad = toggleSeveridad;
+
     function cerrarSlider(silencioso) {
-      if (capaDur)  { mapa.removeLayer(capaDur);  capaDur  = null; }
-      if (capaPost) { mapa.removeLayer(capaPost); capaPost = null; }
-      durActiva = false;
-      postActiva = false;
+      if (capaDur)       { mapa.removeLayer(capaDur);       capaDur       = null; }
+      if (capaPost)      { mapa.removeLayer(capaPost);      capaPost      = null; }
+      if (capaSeveridad) { mapa.removeLayer(capaSeveridad); capaSeveridad = null; }
+      durActiva = false; postActiva = false; sevActiva = false;
       casoActual = null;
       document.querySelectorAll('.caso-card').forEach(function(c) { c.classList.remove('activo'); });
+      var btnSev = document.getElementById('btn-sev');
+      if (btnSev) btnSev.classList.remove('activo');
       if (!silencioso) {
         document.getElementById('slider-panel').classList.remove('visible');
         document.getElementById('btn-historico').classList.remove('activo');
