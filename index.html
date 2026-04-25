@@ -587,38 +587,75 @@
       background: rgba(13,13,13,0.95);
       border: 1px solid rgba(255,69,0,0.5);
       border-radius: 10px;
-      padding: 12px 16px;
+      padding: 10px 14px;
       z-index: 1500;
       display: none;
-      align-items: center;
-      gap: 14px;
-      min-width: 360px;
-      max-width: 90vw;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 320px;
+      max-width: 94vw;
       pointer-events: all;
     }
     #slider-panel.visible { display: flex; }
 
+    .slider-panel-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
     .slider-caso-nombre {
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 14px; font-weight: 700;
-      color: #ff6b35; white-space: nowrap;
+      font-size: 15px; font-weight: 700;
+      color: #ff6b35;
+      flex: 1; min-width: 0;
     }
-    .slider-fechas { font-size: 11px; color: rgba(255,255,255,0.4); }
-
+    .slider-fechas {
+      font-size: 10px; color: rgba(255,255,255,0.35);
+      margin-top: 1px;
+    }
+    .slider-panel-btns {
+      display: flex; align-items: center;
+      gap: 5px; flex-wrap: wrap;
+    }
     .slider-toggle-btns { display: flex; gap: 5px; }
     .btn-slider-tipo {
-      padding: 5px 12px;
+      padding: 5px 10px;
       border-radius: 5px;
-      font-size: 12px; font-weight: 600;
+      font-size: 11px; font-weight: 600;
       font-family: 'Barlow', sans-serif;
       cursor: pointer !important;
       border: 1px solid rgba(255,255,255,0.2);
       background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7);
       transition: all .15s;
       pointer-events: all !important;
+      white-space: nowrap;
     }
     .btn-slider-tipo:hover { background: rgba(255,255,255,0.18); color: white; border-color: rgba(255,255,255,0.4); }
     .btn-slider-tipo.activo { background: #ff4500; border-color: #ff4500; color: white; }
+
+    /* Leyenda de severidad — aparece solo cuando está activa */
+    #leyenda-sev {
+      display: none;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+      padding-top: 6px;
+      border-top: 1px solid rgba(255,255,255,0.07);
+    }
+    #leyenda-sev.visible { display: flex; }
+    .leyenda-sev-titulo {
+      font-size: 10px; color: rgba(255,255,255,0.35);
+      text-transform: uppercase; letter-spacing: .06em;
+      width: 100%; margin-bottom: 2px;
+    }
+    .sev-item {
+      display: flex; align-items: center; gap: 4px;
+      font-size: 10px; color: rgba(255,255,255,0.55);
+    }
+    .sev-dot {
+      width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0;
+    }
 
     #btn-cerrar-slider {
       background: none; border: 1px solid rgba(255,75,74,0.4);
@@ -731,21 +768,43 @@
 
   <!-- ── PANEL CAPAS HISTÓRICAS ACTIVO ────────────────────────────────────── -->
   <div id="slider-panel">
-    <div style="flex:1;min-width:0;">
+    <!-- Fila 1: nombre del caso -->
+    <div style="width:100%;border-bottom:1px solid rgba(255,255,255,0.07);padding-bottom:8px;margin-bottom:8px;">
       <div class="slider-caso-nombre" id="slider-nombre">—</div>
       <div class="slider-fechas" id="slider-fechas"></div>
     </div>
-    <div id="hist-loading"><div class="spin"></div>Cargando imagen...</div>
-    <div class="slider-toggle-btns">
-      <button class="btn-slider-tipo" id="btn-dur" onclick="toggleCapa('dur')">🔥 Durante</button>
-      <button class="btn-slider-tipo" id="btn-post" onclick="toggleCapa('post')">📍 Post-fuego</button>
-      <button class="btn-slider-tipo" id="btn-sev" onclick="toggleSeveridad()" title="Mapa de severidad dNBR · clasificación USGS">🟥 Severidad</button>
+    <!-- Fila 2: botones de capas -->
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;width:100%;">
+      <div id="hist-loading"><div class="spin"></div>Cargando...</div>
+      <div class="slider-toggle-btns">
+        <button class="btn-slider-tipo" id="btn-dur" onclick="toggleCapa('dur')">🔥 Durante</button>
+        <button class="btn-slider-tipo" id="btn-post" onclick="toggleCapa('post')">📍 Post-fuego</button>
+        <button class="btn-slider-tipo" id="btn-sev" onclick="toggleSeveridad()" title="Severidad dNBR · USGS">⬛ Severidad</button>
+      </div>
+      <div class="slider-toggle-btns" style="border-left:1px solid rgba(255,255,255,0.1);padding-left:8px;">
+        <button class="btn-slider-tipo activo" id="btn-rgb" onclick="cambiarTipoSlider('rgb')">RGB</button>
+        <button class="btn-slider-tipo" id="btn-swir" onclick="cambiarTipoSlider('swir')">SWIR</button>
+      </div>
+      <button id="btn-cerrar-slider" onclick="cerrarSlider()" style="margin-left:auto;cursor:pointer;pointer-events:all;">✕</button>
     </div>
-    <div class="slider-toggle-btns" style="border-left:1px solid rgba(255,255,255,0.1);padding-left:10px;">
-      <button class="btn-slider-tipo activo" id="btn-rgb" onclick="cambiarTipoSlider('rgb')">RGB</button>
-      <button class="btn-slider-tipo" id="btn-swir" onclick="cambiarTipoSlider('swir')">SWIR</button>
+    <!-- Leyenda de severidad (se muestra solo cuando está activa) -->
+    <div id="leyenda-sev" >
+      <div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;">Severidad del incendio · Clasificación USGS</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:4px;font-size:11px;color:rgba(255,255,255,0.6);">
+          <span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:#ffff00;flex-shrink:0;"></span>Baja
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;font-size:11px;color:rgba(255,255,255,0.6);">
+          <span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:#ff8c00;flex-shrink:0;"></span>Moderada-baja
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;font-size:11px;color:rgba(255,255,255,0.6);">
+          <span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:#ff4500;flex-shrink:0;"></span>Moderada-alta
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;font-size:11px;color:rgba(255,255,255,0.6);">
+          <span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:#8b0000;flex-shrink:0;"></span>Alta severidad
+        </div>
+      </div>
     </div>
-    <button id="btn-cerrar-slider" onclick="cerrarSlider()" style="cursor:pointer;pointer-events:all;">✕</button>
   </div>
 
   <!-- ── PANEL FILTROS ─────────────────────────────────────────────────────── -->
@@ -1607,6 +1666,7 @@
         if (capaSeveridad) { mapa.removeLayer(capaSeveridad); capaSeveridad = null; }
         sevActiva = false;
         btn.classList.remove('activo');
+        document.getElementById('leyenda-sev').classList.remove('visible');
       } else {
         // Colormap discreto: 1-2 = transparente, 3-6 = amarillo→rojo
         var cm = JSON.stringify({
@@ -1638,6 +1698,7 @@
         capaSeveridad.bringToFront();
         sevActiva = true;
         btn.classList.add('activo');
+        document.getElementById('leyenda-sev').classList.add('visible');
       }
     }
     window.toggleSeveridad = toggleSeveridad;
@@ -1651,6 +1712,8 @@
       document.querySelectorAll('.caso-card').forEach(function(c) { c.classList.remove('activo'); });
       var btnSev = document.getElementById('btn-sev');
       if (btnSev) btnSev.classList.remove('activo');
+      var leySev = document.getElementById('leyenda-sev');
+      if (leySev) leySev.classList.remove('visible');
       if (!silencioso) {
         document.getElementById('slider-panel').classList.remove('visible');
         document.getElementById('btn-historico').classList.remove('activo');
