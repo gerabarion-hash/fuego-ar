@@ -1608,20 +1608,32 @@
         sevActiva = false;
         btn.classList.remove('activo');
       } else {
-        // colormap YlOrRd: amarillo (baja) → rojo oscuro (alta severidad)
-        var url = TITILER +
+        // Colormap discreto: 1-2 = transparente, 3-6 = amarillo→rojo
+        var cm = JSON.stringify({
+          "1":[0,0,0,0], "2":[0,0,0,0],
+          "3":[255,255,0,255], "4":[255,140,0,255],
+          "5":[255,69,0,255], "6":[139,0,0,255]
+        });
+
+        var url = 'https://titiler.xyz/cog/preview.png' +
           '?url=' + encodeURIComponent(R2 + '/' + caso.sev.archivo) +
-          '&rescale=3,6' +
-          '&colormap_name=YlOrRd' +
+          '&colormap=' + encodeURIComponent(cm) +
           '&width=' + caso.sev.w +
           '&height=' + caso.sev.h;
 
-        console.log('Cargando severidad:', url);
+        console.log('URL severidad:', url);
 
-        capaSeveridad = L.imageOverlay(url, caso.sev.bounds, {
-          opacity: 0.8,
-          zIndex: 600
-        });
+        // Verificar que la imagen carga antes de agregarla
+        var img = new Image();
+        img.onload = function() {
+          console.log('Imagen severidad cargada OK:', img.width, 'x', img.height);
+        };
+        img.onerror = function() {
+          console.error('Error cargando imagen severidad');
+        };
+        img.src = url;
+
+        capaSeveridad = L.imageOverlay(url, caso.sev.bounds, { opacity: 0.85, zIndex: 600 });
         capaSeveridad.addTo(mapa);
         capaSeveridad.bringToFront();
         sevActiva = true;
