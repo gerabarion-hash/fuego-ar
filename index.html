@@ -1562,6 +1562,12 @@
       tipoActual = 'rgb';
       console.log('casoActual seteado a:', casoActual);
 
+      // Ocultar focos activos y leyenda — no tienen sentido en modo histórico
+      mapa.removeLayer(capaFocos);
+      document.getElementById('leyenda').style.display = 'none';
+      document.getElementById('btn-toggle-focos').style.opacity = '0.3';
+      document.getElementById('btn-toggle-focos').style.pointerEvents = 'none';
+
       document.getElementById('panel-historico').classList.remove('visible');
       document.getElementById('btn-historico').classList.remove('activo');
       mapa.setView([caso.lat, caso.lng], caso.zoom);
@@ -1714,6 +1720,13 @@
       if (btnSev) btnSev.classList.remove('activo');
       var leySev = document.getElementById('leyenda-sev');
       if (leySev) leySev.classList.remove('visible');
+
+      // Restaurar focos activos y leyenda de confiabilidad
+      if (focosVisibles) mapa.addLayer(capaFocos);
+      document.getElementById('leyenda').style.display = 'block';
+      document.getElementById('btn-toggle-focos').style.opacity = '';
+      document.getElementById('btn-toggle-focos').style.pointerEvents = '';
+
       if (!silencioso) {
         document.getElementById('slider-panel').classList.remove('visible');
         document.getElementById('btn-historico').classList.remove('activo');
