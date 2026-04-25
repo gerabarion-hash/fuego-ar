@@ -2,49 +2,49 @@
   "manzanos": {
     "nombre": "Los Manzanos",
     "lugar": "PN Nahuel Huapi · Río Negro",
+    "ha_total": 11475,
+    "inicio": "25 dic 2024",
+    "fin": "mar 2025",
+    "stats": { "baja": 2840, "mod_baja": 3210, "mod_alta": 3290, "alta": 2135 },
     "lat": -41.497, "lng": -71.661, "zoom": 11,
     "dur":  { "fecha": "2025-01-29", "label": "29 ene 2025", "ventana": 2 },
     "post": { "fecha": "2025-02-13", "label": "13 feb 2025", "ventana": 2 },
-    "sev": {
-      "archivo": "LosManzanos_Severidad_USGS.tif",
-      "bounds": [[-41.661, -71.914], [-41.332, -71.410]],
-      "w": 900, "h": 589
-    }
+    "sev": { "archivo": "LosManzanos_Severidad_USGS.tif", "bounds": [[-41.661, -71.914], [-41.332, -71.410]], "w": 900, "h": 589 }
   },
   "lanin": {
     "nombre": "Lanín / Valle Magdalena",
     "lugar": "PN Lanín · Neuquén",
+    "ha_total": 24100,
+    "inicio": "30 ene 2025",
+    "fin": "23 abr 2025",
+    "stats": { "baja": 5820, "mod_baja": 7340, "mod_alta": 7190, "alta": 3750 },
     "lat": -39.553, "lng": -71.219, "zoom": 11,
     "dur":  { "fecha": "2025-02-01", "label": "1 feb 2025", "ventana": 3 },
     "post": { "fecha": "2025-03-13", "label": "13 mar 2025", "ventana": 3 },
-    "sev": {
-      "archivo": "Lanin2025_Severidad_USGS.tif",
-      "bounds": [[-39.669, -71.462], [-39.437, -70.978]],
-      "w": 900, "h": 431
-    }
+    "sev": { "archivo": "Lanin2025_Severidad_USGS.tif", "bounds": [[-39.669, -71.462], [-39.437, -70.978]], "w": 900, "h": 431 }
   },
   "madryn": {
     "nombre": "Puerto Madryn",
     "lugar": "Estepa costera · Chubut",
+    "ha_total": null,
+    "inicio": "ene 2025",
+    "fin": "feb 2025",
+    "stats": null,
     "lat": -42.305, "lng": -65.008, "zoom": 12,
     "dur":  { "fecha": "2025-01-30", "label": "30 ene 2025", "ventana": 2 },
     "post": { "fecha": "2025-02-04", "label": "4 feb 2025", "ventana": 2 },
-    "sev": {
-      "archivo": "PuertoMadryn_Severidad_USGS.tif",
-      "bounds": [[-42.492, -65.147], [-42.246, -64.883]],
-      "w": 900, "h": 839
-    }
+    "sev": { "archivo": "PuertoMadryn_Severidad_USGS.tif", "bounds": [[-42.492, -65.147], [-42.246, -64.883]], "w": 900, "h": 839 }
   },
   "alerces": {
     "nombre": "PN Los Alerces",
     "lugar": "PN Los Alerces · Chubut",
+    "ha_total": 6924,
+    "inicio": "9 dic 2025",
+    "fin": "feb 2026",
+    "stats": { "baja": 1240, "mod_baja": 1980, "mod_alta": 2180, "alta": 1524 },
     "lat": -42.830, "lng": -71.780, "zoom": 11,
     "dur":  { "fecha": "2026-01-04", "label": "4 ene 2026", "ventana": 2 },
     "post": { "fecha": "2026-02-05", "label": "5 feb 2026", "ventana": 5 },
-    "sev": {
-      "archivo": "Alerces2025_Severidad_USGS.tif",
-      "bounds": [[-43.300, -72.300], [-42.500, -71.300]],
-      "w": 900, "h": 720
-    }
+    "sev": { "archivo": "Alerces2025_Severidad_USGS.tif", "bounds": [[-43.300, -72.300], [-42.500, -71.300]], "w": 900, "h": 720 }
   }
 }
