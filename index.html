@@ -579,6 +579,43 @@
     .caso-fechas { font-size: 11px; color: rgba(255,255,255,0.3); line-height: 1.6; }
     .caso-fechas span { color: rgba(255,255,255,0.55); }
 
+    /* ── STATS DE SEVERIDAD EN TARJETA ──────────────────────────────────── */
+    .caso-stats {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .caso-stats-titulo {
+      font-size: 10px; color: rgba(255,255,255,0.3);
+      text-transform: uppercase; letter-spacing: .06em;
+      margin-bottom: 6px;
+    }
+    .caso-stats-barra {
+      display: flex; height: 8px; border-radius: 4px;
+      overflow: hidden; gap: 1px; margin-bottom: 5px;
+    }
+    .sev-seg {
+      height: 100%; border-radius: 2px;
+      transition: opacity .2s;
+    }
+    .sev-seg:hover { opacity: .75; }
+    .caso-stats-labels {
+      display: flex; gap: 0; font-size: 9px;
+    }
+    .sev-lbl {
+      flex: 1; text-align: center;
+      color: rgba(255,255,255,0.35);
+      line-height: 1.3;
+    }
+    .sev-lbl strong {
+      display: block; font-size: 10px;
+      color: rgba(255,255,255,0.6);
+    }
+    .caso-ha-total {
+      font-size: 13px; font-weight: 700;
+      color: #ff6b35; margin-bottom: 2px;
+    }
+
     /* ── PANEL SLIDER ACTIVO ─────────────────────────────────────────────── */
     #slider-panel {
       position: absolute;
@@ -706,46 +743,10 @@
   <div id="panel-historico">
     <div class="hist-titulo">📂 Casos históricos documentados</div>
     <div class="hist-subtitulo">Análisis satelital pre/durante/post incendio · Sentinel-2 L2A · Google Earth Engine</div>
-    <div class="casos-grid">
-      <div class="caso-card" onclick="abrirCaso('manzanos')">
-        <div class="caso-nombre">🔥 Los Manzanos</div>
-        <div class="caso-lugar">PN Nahuel Huapi · Río Negro</div>
-        <div class="caso-ha">~11.475 ha afectadas</div>
-        <div class="caso-fechas">
-          Inicio: <span>25 dic 2024</span><br>
-          Detenido: <span>mar 2025</span> (70 días de combate)<br>
-          Imágenes: <span>29 ene</span> (durante) · <span>13 feb 2025</span> (post)
-        </div>
-      </div>
-      <div class="caso-card" onclick="abrirCaso('lanin')">
-        <div class="caso-nombre">🔥 Lanín / Valle Magdalena</div>
-        <div class="caso-lugar">PN Lanín · Neuquén</div>
-        <div class="caso-ha">~24.100 ha afectadas</div>
-        <div class="caso-fechas">
-          Inicio: <span>30 ene 2025</span><br>
-          Contenido: <span>3 mar 2025</span> · Extinguido: <span>23 abr 2025</span><br>
-          Imágenes: <span>1 feb</span> (durante) · <span>13 mar 2025</span> (post)
-        </div>
-      </div>
-      <div class="caso-card" onclick="abrirCaso('madryn')">
-        <div class="caso-nombre">🔥 Puerto Madryn</div>
-        <div class="caso-lugar">Estepa costera · Chubut</div>
-        <div class="caso-ha">Estepa patagónica</div>
-        <div class="caso-fechas">
-          Inicio: <span>ene 2025</span><br>
-          Controlado: <span>feb 2025</span><br>
-          Imágenes: <span>30 ene</span> (durante) · <span>4 feb 2025</span> (post)
-        </div>
-      </div>
-      <div class="caso-card" onclick="abrirCaso('alerces')">
-        <div class="caso-nombre">🔥 PN Los Alerces</div>
-        <div class="caso-lugar">PN Los Alerces · Chubut</div>
-        <div class="caso-ha">~6.924 ha dentro del parque</div>
-        <div class="caso-fechas">
-          Inicio: <span>9 dic 2025</span><br>
-          Controlado: <span>feb 2026</span><br>
-          Imágenes: <span>4 ene 2026</span> (durante) · <span>15 mar 2026</span> (post)
-        </div>
+    <div class="casos-grid" id="casos-grid">
+      <!-- Se rellena dinámicamente desde casos.json -->
+      <div style="grid-column:1/-1;text-align:center;padding:20px;color:rgba(255,255,255,0.3);font-size:13px;">
+        Cargando casos...
       </div>
     </div>
   </div>
@@ -1509,11 +1510,72 @@
       }
     };
 
+    // ── Renderizar tarjetas dinámicamente desde CASOS ────────────────────────
+    var SEV_COLORES = {
+      baja:     { color: '#ffff00', label: 'Baja' },
+      mod_baja: { color: '#ff8c00', label: 'Mod-B' },
+      mod_alta: { color: '#ff4500', label: 'Mod-A' },
+      alta:     { color: '#8b0000', label: 'Alta' }
+    };
+
+    function renderizarTarjetas() {
+      var grid = document.getElementById('casos-grid');
+      if (!grid || !CASOS) return;
+      var keys = Object.keys(CASOS);
+      var html = '';
+
+      keys.forEach(function(id) {
+        var c = CASOS[id];
+        var haTexto = c.ha_total ? c.ha_total.toLocaleString('es-AR') + ' ha afectadas' : 'Superficie en análisis';
+        var finTexto = c.fin ? 'Controlado: <span>' + c.fin + '</span><br>' : '';
+
+        // Barra de severidad
+        var statsHtml = '';
+        if (c.stats) {
+          var total = c.stats.baja + c.stats.mod_baja + c.stats.mod_alta + c.stats.alta;
+          var segs = '', lbls = '';
+          ['baja','mod_baja','mod_alta','alta'].forEach(function(k) {
+            var pct = Math.round(c.stats[k] / total * 100);
+            var ha  = c.stats[k].toLocaleString('es-AR');
+            segs += '<div class="sev-seg" style="width:' + pct + '%;background:' + SEV_COLORES[k].color + ';" title="' + SEV_COLORES[k].label + ': ' + ha + ' ha (' + pct + '%)"></div>';
+            lbls += '<div class="sev-lbl"><strong>' + pct + '%</strong>' + SEV_COLORES[k].label + '</div>';
+          });
+          statsHtml = '<div class="caso-stats">' +
+            '<div class="caso-stats-titulo">Severidad del incendio (dNBR · USGS)</div>' +
+            '<div class="caso-stats-barra">' + segs + '</div>' +
+            '<div class="caso-stats-labels">' + lbls + '</div>' +
+            '</div>';
+        }
+
+        html += '<div class="caso-card" id="card-' + id + '" onclick="abrirCaso(\'' + id + '\')">' +
+          '<div class="caso-nombre">🔥 ' + c.nombre + '</div>' +
+          '<div class="caso-lugar">' + c.lugar + '</div>' +
+          '<div class="caso-ha-total">' + haTexto + '</div>' +
+          '<div class="caso-fechas">' +
+            'Inicio: <span>' + (c.inicio || '—') + '</span><br>' +
+            finTexto +
+            'Imágenes: <span>' + c.dur.label + '</span> (durante) · <span>' + c.post.label + '</span> (post)' +
+          '</div>' +
+          statsHtml +
+          '</div>';
+      });
+
+      grid.innerHTML = html;
+    }
+
     // Cargar casos.json — si falla usa el fallback
     fetch('casos.json')
       .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
-      .then(function(data) { CASOS = data; console.log('✓ casos.json cargado'); })
-      .catch(function() { CASOS = CASOS_FALLBACK; console.log('casos.json no encontrado, usando fallback'); });
+      .then(function(data) {
+        CASOS = data;
+        console.log('✓ casos.json cargado');
+        renderizarTarjetas();
+      })
+      .catch(function() {
+        CASOS = CASOS_FALLBACK;
+        console.log('casos.json no encontrado, usando fallback');
+        renderizarTarjetas();
+      });
 
     var capaDur  = null;  // capa "durante el incendio"
     var capaPost = null;  // capa "post-fuego"
