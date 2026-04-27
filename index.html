@@ -709,28 +709,31 @@
       margin-bottom: 28px;
     }
     .splash-features {
-      display: flex; flex-direction: column; gap: 14px;
-      margin-bottom: 28px; text-align: left;
+      display: flex; flex-direction: column; gap: 10px;
+      margin-bottom: 24px; text-align: left;
     }
     .splash-feat {
-      display: flex; align-items: flex-start; gap: 14px;
-    }
-    .splash-feat-icon {
-      font-size: 22px; flex-shrink: 0;
-      width: 40px; height: 40px;
-      background: rgba(255,69,0,0.1);
-      border: 1px solid rgba(255,69,0,0.2);
+      display: flex; align-items: center; gap: 14px;
+      padding: 12px 14px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
       border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
+    }
+    .splash-num {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 28px; font-weight: 700;
+      color: #ff4500; line-height: 1;
+      min-width: 28px; text-align: center;
+      flex-shrink: 0;
     }
     .splash-feat-texto strong {
       display: block;
-      font-size: 13px; font-weight: 600;
+      font-size: 14px; font-weight: 600;
       color: #e8e8e8; margin-bottom: 2px;
     }
     .splash-feat-texto span {
-      font-size: 11px; color: rgba(255,255,255,0.4);
-      line-height: 1.5;
+      font-size: 11px; color: rgba(255,255,255,0.38);
+      line-height: 1.4;
     }
     #btn-splash {
       width: 100%;
@@ -772,34 +775,34 @@
   <div id="splash">
     <div id="splash-box">
       <div class="splash-logo">🔥 <span>FUEGO</span>AR</div>
-      <div class="splash-tagline">Monitor satelital de incendios en Argentina</div>
+      <div class="splash-tagline">Monitor satelital de incendios en Argentina · datos NASA en tiempo real</div>
 
       <div class="splash-features">
         <div class="splash-feat">
-          <div class="splash-feat-icon">🛰</div>
+          <div class="splash-num">1</div>
           <div class="splash-feat-texto">
-            <strong>Focos activos en tiempo real</strong>
-            <span>Detectados por satélites NASA cada 3-6 horas. Hacé clic en cualquier foco para ver la imagen satelital Sentinel-2.</span>
+            <strong>Hacé clic en cualquier foco del mapa</strong>
+            <span>Son incendios detectados hoy por satélites NASA. Cada punto es un foco activo real.</span>
           </div>
         </div>
         <div class="splash-feat">
-          <div class="splash-feat-icon">📂</div>
+          <div class="splash-num">2</div>
           <div class="splash-feat-texto">
-            <strong>Casos históricos analizados</strong>
-            <span>4 grandes incendios en la Patagonia con imágenes durante y post-fuego, y mapa de severidad del daño.</span>
+            <strong>Mirá la imagen satelital del incendio más próximo</strong>
+            <span>Sentinel-2 te muestra la zona en color real o en infrarrojo — aunque haya humo.</span>
           </div>
         </div>
         <div class="splash-feat">
-          <div class="splash-feat-icon">🔍</div>
+          <div class="splash-num">3</div>
           <div class="splash-feat-texto">
-            <strong>Filtrá y comparé</strong>
-            <span>Filtrá por confiabilidad, intensidad (FRP) o fecha. Alternando RGB y SWIR podés ver el fuego activo aunque haya humo.</span>
+            <strong>Explorá los grandes incendios históricos de la Patagonia</strong>
+            <span>Antes, durante y después del fuego, con mapa de severidad del daño.</span>
           </div>
         </div>
       </div>
 
-      <button id="btn-splash" onclick="cerrarSplash()">Explorar el mapa →</button>
-      <div class="splash-nota">No volvés a ver esto · Datos: NASA FIRMS · Copernicus ESA</div>
+      <button id="btn-splash" onclick="cerrarSplash()">Entrar al mapa →</button>
+      <div class="splash-nota">No volvés a ver esto · Datos: NASA FIRMS · Copernicus / ESA</div>
     </div>
   </div>
 
