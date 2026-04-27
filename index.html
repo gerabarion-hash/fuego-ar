@@ -580,37 +580,14 @@
     .caso-fechas span { color: rgba(255,255,255,0.55); }
 
     /* ── STATS DE SEVERIDAD EN TARJETA ──────────────────────────────────── */
-    .caso-stats {
-      margin-top: 10px;
-      padding-top: 10px;
-      border-top: 1px solid rgba(255,255,255,0.06);
-    }
-    .caso-stats-titulo {
-      font-size: 10px; color: rgba(255,255,255,0.3);
-      text-transform: uppercase; letter-spacing: .06em;
-      margin-bottom: 6px;
-    }
-    .caso-stats-barra {
-      display: flex; height: 8px; border-radius: 4px;
-      overflow: hidden; gap: 1px; margin-bottom: 5px;
-    }
-    .sev-seg {
-      height: 100%; border-radius: 2px;
-      transition: opacity .2s;
-    }
-    .sev-seg:hover { opacity: .75; }
-    .caso-stats-labels {
-      display: flex; gap: 0; font-size: 9px;
-    }
-    .sev-lbl {
-      flex: 1; text-align: center;
-      color: rgba(255,255,255,0.35);
-      line-height: 1.3;
-    }
-    .sev-lbl strong {
-      display: block; font-size: 10px;
-      color: rgba(255,255,255,0.6);
-    }
+
+
+
+
+
+
+
+
     .caso-ha-total {
       font-size: 13px; font-weight: 700;
       color: #ff6b35; margin-bottom: 2px;
@@ -704,7 +681,72 @@
     }
     #btn-cerrar-slider:hover { background: rgba(226,75,74,0.15); }
 
-    /* ── SIDE BY SIDE DIVIDER ────────────────────────────────────────────── */
+    /* ── SPLASH BIENVENIDA ───────────────────────────────────────────────── */
+    #splash {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.82);
+      backdrop-filter: blur(6px);
+      z-index: 4000;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    #splash-box {
+      background: #111;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      width: 100%; max-width: 460px;
+      padding: 32px 28px;
+      text-align: center;
+    }
+    .splash-logo {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 32px; font-weight: 700;
+      color: #ff4500; margin-bottom: 4px;
+    }
+    .splash-logo span { color: #e8e8e8; }
+    .splash-tagline {
+      font-size: 13px; color: rgba(255,255,255,0.4);
+      margin-bottom: 28px;
+    }
+    .splash-features {
+      display: flex; flex-direction: column; gap: 14px;
+      margin-bottom: 28px; text-align: left;
+    }
+    .splash-feat {
+      display: flex; align-items: flex-start; gap: 14px;
+    }
+    .splash-feat-icon {
+      font-size: 22px; flex-shrink: 0;
+      width: 40px; height: 40px;
+      background: rgba(255,69,0,0.1);
+      border: 1px solid rgba(255,69,0,0.2);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .splash-feat-texto strong {
+      display: block;
+      font-size: 13px; font-weight: 600;
+      color: #e8e8e8; margin-bottom: 2px;
+    }
+    .splash-feat-texto span {
+      font-size: 11px; color: rgba(255,255,255,0.4);
+      line-height: 1.5;
+    }
+    #btn-splash {
+      width: 100%;
+      background: #ff4500; border: none;
+      color: white; padding: 12px;
+      border-radius: 8px; font-size: 14px;
+      font-weight: 700; font-family: 'Barlow', sans-serif;
+      cursor: pointer; transition: background .2s;
+    }
+    #btn-splash:hover { background: #e03d00; }
+    .splash-nota {
+      font-size: 10px; color: rgba(255,255,255,0.2);
+      margin-top: 12px;
+    }
+
+    /* ── SIDE BY SIDE ────────────────────────────────────────────────────── */
     .leaflet-sbs-range {
       -webkit-appearance: none;
       display: block;
@@ -725,6 +767,41 @@
   </style>
 </head>
 <body>
+
+  <!-- ── SPLASH BIENVENIDA ─────────────────────────────────────────────────── -->
+  <div id="splash">
+    <div id="splash-box">
+      <div class="splash-logo">🔥 <span>FUEGO</span>AR</div>
+      <div class="splash-tagline">Monitor satelital de incendios en Argentina</div>
+
+      <div class="splash-features">
+        <div class="splash-feat">
+          <div class="splash-feat-icon">🛰</div>
+          <div class="splash-feat-texto">
+            <strong>Focos activos en tiempo real</strong>
+            <span>Detectados por satélites NASA cada 3-6 horas. Hacé clic en cualquier foco para ver la imagen satelital Sentinel-2.</span>
+          </div>
+        </div>
+        <div class="splash-feat">
+          <div class="splash-feat-icon">📂</div>
+          <div class="splash-feat-texto">
+            <strong>Casos históricos analizados</strong>
+            <span>4 grandes incendios en la Patagonia con imágenes durante y post-fuego, y mapa de severidad del daño.</span>
+          </div>
+        </div>
+        <div class="splash-feat">
+          <div class="splash-feat-icon">🔍</div>
+          <div class="splash-feat-texto">
+            <strong>Filtrá y comparé</strong>
+            <span>Filtrá por confiabilidad, intensidad (FRP) o fecha. Alternando RGB y SWIR podés ver el fuego activo aunque haya humo.</span>
+          </div>
+        </div>
+      </div>
+
+      <button id="btn-splash" onclick="cerrarSplash()">Explorar el mapa →</button>
+      <div class="splash-nota">No volvés a ver esto · Datos: NASA FIRMS · Copernicus ESA</div>
+    </div>
+  </div>
 
   <!-- ── HEADER ────────────────────────────────────────────────────────────── -->
   <div id="header">
@@ -992,6 +1069,19 @@
     var primeraVezSentinel = true;
     var INSTANCE_ID = 'c87c1637-7fee-40c3-96fa-f9037b487389';
     var focoActualCompartir = null; // legacy — se puede quitar en próxima limpieza
+
+    // ── Splash de bienvenida ──────────────────────────────────────────────────
+    function cerrarSplash() {
+      document.getElementById('splash').style.display = 'none';
+      try { localStorage.setItem('fuegoar_splash_visto', '1'); } catch(e) {}
+    }
+    // No mostrar si ya lo vio
+    try {
+      if (localStorage.getItem('fuegoar_splash_visto')) {
+        document.getElementById('splash').style.display = 'none';
+      }
+    } catch(e) {}
+    window.cerrarSplash = cerrarSplash;
 
     // ── Menú mobile ───────────────────────────────────────────────────────────
     function toggleMenuMobile() {
@@ -1511,13 +1601,6 @@
     };
 
     // ── Renderizar tarjetas dinámicamente desde CASOS ────────────────────────
-    var SEV_COLORES = {
-      baja:     { color: '#ffff00', label: 'Baja' },
-      mod_baja: { color: '#ff8c00', label: 'Mod-B' },
-      mod_alta: { color: '#ff4500', label: 'Mod-A' },
-      alta:     { color: '#8b0000', label: 'Alta' }
-    };
-
     function renderizarTarjetas() {
       var grid = document.getElementById('casos-grid');
       if (!grid || !CASOS) return;
@@ -1529,24 +1612,6 @@
         var haTexto = c.ha_total ? c.ha_total.toLocaleString('es-AR') + ' ha afectadas' : 'Superficie en análisis';
         var finTexto = c.fin ? 'Controlado: <span>' + c.fin + '</span><br>' : '';
 
-        // Barra de severidad
-        var statsHtml = '';
-        if (c.stats) {
-          var total = c.stats.baja + c.stats.mod_baja + c.stats.mod_alta + c.stats.alta;
-          var segs = '', lbls = '';
-          ['baja','mod_baja','mod_alta','alta'].forEach(function(k) {
-            var pct = Math.round(c.stats[k] / total * 100);
-            var ha  = c.stats[k].toLocaleString('es-AR');
-            segs += '<div class="sev-seg" style="width:' + pct + '%;background:' + SEV_COLORES[k].color + ';" title="' + SEV_COLORES[k].label + ': ' + ha + ' ha (' + pct + '%)"></div>';
-            lbls += '<div class="sev-lbl"><strong>' + pct + '%</strong>' + SEV_COLORES[k].label + '</div>';
-          });
-          statsHtml = '<div class="caso-stats">' +
-            '<div class="caso-stats-titulo">Severidad del incendio (dNBR · USGS)</div>' +
-            '<div class="caso-stats-barra">' + segs + '</div>' +
-            '<div class="caso-stats-labels">' + lbls + '</div>' +
-            '</div>';
-        }
-
         html += '<div class="caso-card" id="card-' + id + '" onclick="abrirCaso(\'' + id + '\')">' +
           '<div class="caso-nombre">🔥 ' + c.nombre + '</div>' +
           '<div class="caso-lugar">' + c.lugar + '</div>' +
@@ -1556,7 +1621,6 @@
             finTexto +
             'Imágenes: <span>' + c.dur.label + '</span> (durante) · <span>' + c.post.label + '</span> (post)' +
           '</div>' +
-          statsHtml +
           '</div>';
       });
 
