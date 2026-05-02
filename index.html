@@ -73,7 +73,7 @@
       #nav-btns button { width: 100%; text-align: left; }
     }
 
-    #btn-filtros, #btn-toggle-focos, #btn-faq {
+    #btn-filtros, #btn-toggle-focos, #btn-faq, #btn-met {
       background: rgba(255,255,255,0.08);
       border: 1px solid rgba(255,255,255,0.15);
       color: #e8e8e8;
@@ -85,7 +85,7 @@
       transition: background .2s;
       white-space: nowrap;
     }
-    #btn-filtros:hover, #btn-toggle-focos:hover, #btn-faq:hover { background: rgba(255,255,255,0.14); }
+    #btn-filtros:hover, #btn-toggle-focos:hover, #btn-faq:hover, #btn-met:hover { background: rgba(255,255,255,0.14); }
     #btn-toggle-focos.oculto { opacity: 0.4; }
 
     /* ── PANEL FILTROS ────────────────────────────────────────────────────── */
@@ -749,6 +749,85 @@
       margin-top: 12px;
     }
 
+    /* ── MODAL METODOLOGÍA ───────────────────────────────────────────────── */
+    #met-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(4px);
+      z-index: 3000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    #met-overlay.visible { display: flex; }
+    #met-modal {
+      background: #111;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 14px;
+      width: 100%; max-width: 580px;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 24px;
+      position: relative;
+    }
+    #met-modal::-webkit-scrollbar { width: 5px; }
+    #met-modal::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+    .met-header-titulo {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 22px; font-weight: 700;
+      color: #ff6b35; margin-bottom: 4px;
+    }
+    .met-header-sub { font-size: 12px; color: rgba(255,255,255,0.35); margin-bottom: 20px; }
+    #btn-cerrar-met {
+      position: absolute; top: 16px; right: 18px;
+      background: none; border: 1px solid rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.5); font-size: 14px;
+      padding: 4px 10px; border-radius: 5px;
+      cursor: pointer; font-family: 'Barlow', sans-serif;
+    }
+    #btn-cerrar-met:hover { border-color: #E24B4A; color: #E24B4A; }
+    .met-section-titulo {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px; font-weight: 700;
+      letter-spacing: .06em; text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+      margin-top: 20px; margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .met-flujo {
+      display: flex; align-items: center; gap: 6px;
+      flex-wrap: wrap; margin-bottom: 12px;
+    }
+    .met-paso {
+      background: rgba(255,69,0,0.1);
+      border: 1px solid rgba(255,69,0,0.25);
+      border-radius: 6px; padding: 7px 12px;
+      font-size: 12px; color: #ff6b35; font-weight: 600;
+    }
+    .met-arrow { color: rgba(255,255,255,0.2); font-size: 16px; }
+    .met-tabla { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .met-tabla tr { border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .met-tabla tr:last-child { border-bottom: none; }
+    .met-tabla td { padding: 7px 6px; color: rgba(255,255,255,0.55); vertical-align: top; }
+    .met-tabla td:first-child { color: rgba(255,255,255,0.8); font-weight: 600; width: 38%; }
+    .met-formula {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 6px; padding: 10px 14px;
+      font-family: monospace; font-size: 12px;
+      color: #ff6b35; line-height: 1.8;
+      margin-bottom: 10px;
+    }
+    .met-nota {
+      font-size: 11px; color: rgba(255,255,255,0.25);
+      margin-top: 16px; padding-top: 12px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      line-height: 1.6;
+    }
+    .met-nota a { color: rgba(255,107,53,0.6); text-decoration: none; }
+
     /* ── SIDE BY SIDE ────────────────────────────────────────────────────── */
     .leaflet-sbs-range {
       -webkit-appearance: none;
@@ -815,6 +894,7 @@
       <button id="btn-toggle-focos" onclick="toggleFocos()">🔥 Ocultar focos</button>
       <button id="btn-historico" onclick="toggleHistorico()">📂 Casos históricos</button>
       <button id="btn-faq" onclick="toggleFaq()">? FAQ</button>
+      <button id="btn-met" onclick="toggleMet()">ℹ Sobre</button>
     </div>
     <div id="contador-header">Focos: <strong id="num-focos">—</strong></div>
   </div>
@@ -950,6 +1030,68 @@
       <div class="sentinel-label-fechas">Imágenes disponibles — seleccioná para comparar</div>
       <div class="fechas-sentinel" id="fechas-sentinel-btns">
         <div class="nota">Buscando imágenes reales...</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.07);">
+      <span style="font-size:10px;color:rgba(255,255,255,0.3);white-space:nowrap;">☀ Brillo</span>
+      <input type="range" id="brillo-sentinel" min="40" max="200" value="100"
+        oninput="ajustarBrilloSentinel(this.value)"
+        style="flex:1;accent-color:#ff4500;cursor:pointer;">
+      <span style="font-size:10px;color:rgba(255,255,255,0.3);white-space:nowrap;" id="brillo-sentinel-val">100%</span>
+    </div>
+  </div>
+
+  <!-- ── MODAL METODOLOGÍA ─────────────────────────────────────────────────── -->
+  <div id="met-overlay" onclick="cerrarMetOverlay(event)">
+    <div id="met-modal">
+      <button id="btn-cerrar-met" onclick="toggleMet()">✕ Cerrar</button>
+      <div class="met-header-titulo">ℹ Sobre FuegoAR</div>
+      <div class="met-header-sub">Stack técnico · metodología de análisis · fuentes de datos</div>
+
+      <div class="met-section-titulo">¿Qué es?</div>
+      <p style="font-size:13px;color:rgba(255,255,255,0.55);line-height:1.7;margin-bottom:8px;">
+        FuegoAR es una plataforma web de monitoreo satelital de incendios forestales en Argentina.
+        Combina detección de focos activos en tiempo real con análisis histórico de severidad de daño,
+        desarrollada como herramienta pública y portfolio GIS profesional.
+      </p>
+
+      <div class="met-section-titulo">Flujo técnico</div>
+      <div class="met-flujo">
+        <div class="met-paso">NASA FIRMS<br><span style="font-size:10px;opacity:.6;">focos activos</span></div>
+        <div class="met-arrow">→</div>
+        <div class="met-paso">Sentinel-2<br><span style="font-size:10px;opacity:.6;">verificación visual</span></div>
+        <div class="met-arrow">→</div>
+        <div class="met-paso">Google Earth Engine<br><span style="font-size:10px;opacity:.6;">análisis dNBR/NDVI</span></div>
+        <div class="met-arrow">→</div>
+        <div class="met-paso">titiler + R2<br><span style="font-size:10px;opacity:.6;">servicio web</span></div>
+      </div>
+
+      <div class="met-section-titulo">Índice de severidad (dNBR)</div>
+      <div class="met-formula">
+        NBR = (B8 − B12) / (B8 + B12)<br>
+        dNBR = NBR<sub>pre-fuego</sub> − NBR<sub>post-fuego</sub>
+      </div>
+      <p style="font-size:12px;color:rgba(255,255,255,0.4);line-height:1.6;margin-bottom:8px;">
+        Máscara SCL aplicada para excluir agua, nieve y nubes — crítico en la cordillera patagónica.
+        Clasificación USGS de 6 niveles (Key &amp; Benson, 2006).
+      </p>
+
+      <div class="met-section-titulo">Stack de tecnologías</div>
+      <table class="met-tabla">
+        <tr><td>Frontend</td><td>HTML5 + Leaflet.js — sin frameworks, carga rápida</td></tr>
+        <tr><td>Focos activos</td><td>NASA FIRMS API — VIIRS NOAA-20 y NOAA-21 NRT</td></tr>
+        <tr><td>Imágenes satelitales</td><td>Sentinel Hub WMS · Copernicus Data Space</td></tr>
+        <tr><td>Catálogo STAC</td><td>Element84 Earth Search (AWS) — CORS nativo</td></tr>
+        <tr><td>Análisis histórico</td><td>Google Earth Engine — S2_SR_HARMONIZED</td></tr>
+        <tr><td>Rasters web</td><td>titiler + Cloudflare R2 — COG sin redirecciones</td></tr>
+        <tr><td>Límite geográfico</td><td>Algoritmo punto-en-polígono client-side</td></tr>
+        <tr><td>Hosting</td><td>GitHub Pages — deploy automático en cada push</td></tr>
+      </table>
+
+      <div class="met-nota">
+        Desarrollado por <strong style="color:rgba(255,255,255,0.6);">Gera Barion</strong> — GIS &amp; Geospatial Web Developer.<br>
+        Datos: NASA FIRMS · Copernicus / ESA · Google Earth Engine.<br>
+        Código fuente: <a href="https://github.com/gerabarion-hash/fuego-ar" target="_blank">github.com/gerabarion-hash/fuego-ar</a>
       </div>
     </div>
   </div>
@@ -1180,6 +1322,19 @@
     }
     window.moverDia = moverDia;
     window.limpiarFecha = limpiarFecha;
+    // ── Modal metodología ─────────────────────────────────────────────────────
+    function toggleMet() {
+      var ov = document.getElementById('met-overlay');
+      ov.classList.toggle('visible');
+      document.getElementById('panel-filtros').classList.remove('visible');
+      document.getElementById('faq-overlay').classList.remove('visible');
+      document.getElementById('panel-historico').classList.remove('visible');
+    }
+    function cerrarMetOverlay(e) {
+      if (e.target === document.getElementById('met-overlay')) toggleMet();
+    }
+    window.toggleMet = toggleMet;
+
     function toggleFaq() {
       document.getElementById('faq-overlay').classList.toggle('visible');
       document.getElementById('panel-filtros').classList.remove('visible');
@@ -1223,6 +1378,9 @@
       }
       primeraVezSentinel = true;
       document.getElementById('sentinel-panel').classList.remove('visible');
+      // Reset brillo
+      var bs = document.getElementById('brillo-sentinel');
+      if (bs) { bs.value = 100; ajustarBrilloSentinel(100); }
     }
 
     // ── Sentinel: cargar capa WMS ─────────────────────────────────────────────
@@ -1846,13 +2004,16 @@
     }
     function ajustarBrillo(val) {
       document.getElementById('brillo-val').textContent = val + '%';
-      // Aplica el filtro a todas las capas WMS/imageOverlay activas
       var layers = document.querySelectorAll('.leaflet-layer img, .leaflet-image-layer');
-      layers.forEach(function(el) {
-        el.style.filter = 'brightness(' + (val/100) + ')';
-      });
+      layers.forEach(function(el) { el.style.filter = 'brightness(' + (val/100) + ')'; });
+    }
+    function ajustarBrilloSentinel(val) {
+      document.getElementById('brillo-sentinel-val').textContent = val + '%';
+      var layers = document.querySelectorAll('.leaflet-layer img, .leaflet-image-layer');
+      layers.forEach(function(el) { el.style.filter = 'brightness(' + (val/100) + ')'; });
     }
     window.ajustarBrillo = ajustarBrillo;
+    window.ajustarBrilloSentinel = ajustarBrilloSentinel;
 
     function cerrarSlider(silencioso) {
       if (capaDur)       { mapa.removeLayer(capaDur);       capaDur       = null; }
@@ -1890,7 +2051,7 @@
     // Evitar que Leaflet capture los clicks de todos los paneles
     // Se aplica tanto al init como cuando se hace visible el slider-panel
     function bloquearLeaflet() {
-      ['slider-panel', 'panel-historico', 'panel-filtros', 'sentinel-panel', 'faq-overlay'].forEach(function(id) {
+      ['slider-panel', 'panel-historico', 'panel-filtros', 'sentinel-panel', 'faq-overlay', 'met-overlay'].forEach(function(id) {
         var el = document.getElementById(id);
         if (el) {
           L.DomEvent.disableClickPropagation(el);
