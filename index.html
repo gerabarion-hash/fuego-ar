@@ -524,7 +524,7 @@
       position: absolute;
       top: 62px; left: 50%;
       transform: translateX(-50%);
-      width: 680px;
+      width: 960px;
       max-width: 96vw;
       background: rgba(13,13,13,0.97);
       backdrop-filter: blur(12px);
@@ -550,8 +550,11 @@
 
     .casos-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr;
       gap: 10px;
+    }
+    @media (max-width: 680px) {
+      .casos-grid { grid-template-columns: 1fr; }
     }
 
     .caso-card {
