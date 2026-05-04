@@ -6,6 +6,7 @@
     "inicio": "25 dic 2024",
     "fin": "mar 2025",
     "lat": -41.497, "lng": -71.661, "zoom": 11,
+    "pre":  { "fecha": "2024-11-18", "label": "18 nov 2024", "ventana": 2 },
     "dur":  { "fecha": "2025-01-29", "label": "29 ene 2025", "ventana": 2 },
     "post": { "fecha": "2025-02-13", "label": "13 feb 2025", "ventana": 2 },
     "sev": { "archivo": "LosManzanos_Severidad_USGS.tif", "bounds": [[-41.661, -71.914], [-41.332, -71.410]], "w": 900, "h": 589 }
@@ -17,6 +18,7 @@
     "inicio": "30 ene 2025",
     "fin": "23 abr 2025",
     "lat": -39.553, "lng": -71.219, "zoom": 11,
+    "pre":  { "fecha": "2024-12-25", "label": "25 dic 2024", "ventana": 3 },
     "dur":  { "fecha": "2025-02-01", "label": "1 feb 2025", "ventana": 3 },
     "post": { "fecha": "2025-03-13", "label": "13 mar 2025", "ventana": 3 },
     "sev": { "archivo": "Lanin2025_Severidad_USGS.tif", "bounds": [[-39.669, -71.462], [-39.437, -70.978]], "w": 900, "h": 431 }
@@ -28,6 +30,7 @@
     "inicio": "ene 2025",
     "fin": "feb 2025",
     "lat": -42.305, "lng": -65.008, "zoom": 12,
+    "pre":  { "fecha": "2025-01-03", "label": "3 ene 2025", "ventana": 2 },
     "dur":  { "fecha": "2025-01-30", "label": "30 ene 2025", "ventana": 2 },
     "post": { "fecha": "2025-02-04", "label": "4 feb 2025", "ventana": 2 },
     "sev": { "archivo": "PuertoMadryn_Severidad_USGS.tif", "bounds": [[-42.492, -65.147], [-42.246, -64.883]], "w": 900, "h": 839 }
@@ -39,6 +42,7 @@
     "inicio": "9 dic 2025",
     "fin": "feb 2026",
     "lat": -42.830, "lng": -71.780, "zoom": 11,
+    "pre":  { "fecha": "2025-11-03", "label": "3 nov 2025", "ventana": 2 },
     "dur":  { "fecha": "2026-01-04", "label": "4 ene 2026", "ventana": 2 },
     "post": { "fecha": "2026-02-05", "label": "5 feb 2026", "ventana": 5 },
     "sev": { "archivo": "Alerces2025_Severidad_USGS.tif", "bounds": [[-43.300, -72.300], [-42.500, -71.300]], "w": 900, "h": 720 }
@@ -50,6 +54,7 @@
     "inicio": "ene 2021",
     "fin": "feb 2021",
     "lat": -41.936, "lng": -71.377, "zoom": 11,
+    "pre":  { "fecha": "2020-12-31", "label": "31 dic 2020", "ventana": 2 },
     "dur":  { "fecha": "2021-01-25", "label": "25 ene 2021", "ventana": 2 },
     "post": { "fecha": "2021-02-14", "label": "14 feb 2021", "ventana": 2 },
     "sev": { "archivo": "Bolson2021_Severidad_USGS.tif", "bounds": [[-42.059, -71.558], [-41.813, -71.197]], "w": 900, "h": 612 }
@@ -61,6 +66,7 @@
     "inicio": "ago 2020",
     "fin": "nov 2020",
     "lat": -31.141, "lng": -64.664, "zoom": 10,
+    "pre":  { "fecha": "2020-08-05", "label": "5 ago 2020", "ventana": 2 },
     "dur":  { "fecha": "2020-09-29", "label": "29 sep 2020", "ventana": 2 },
     "post": { "fecha": "2020-10-29", "label": "29 oct 2020", "ventana": 2 },
     "sev": { "archivo": "Cordoba2020_Severidad_USGS.tif", "bounds": [[-31.737, -65.112], [-30.545, -64.217]], "w": 900, "h": 1200 }

@@ -941,9 +941,10 @@
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;width:100%;">
       <div id="hist-loading"><div class="spin"></div>Cargando...</div>
       <div class="slider-toggle-btns">
+        <button class="btn-slider-tipo" id="btn-pre" onclick="toggleCapa('pre')">🌿 Antes</button>
         <button class="btn-slider-tipo" id="btn-dur" onclick="toggleCapa('dur')">🔥 Durante</button>
-        <button class="btn-slider-tipo" id="btn-post" onclick="toggleCapa('post')">📍 Post-fuego</button>
-        <button class="btn-slider-tipo" id="btn-sev" onclick="toggleSeveridad()" title="Severidad dNBR · USGS">⬛ Severidad</button>
+        <button class="btn-slider-tipo" id="btn-post" onclick="toggleCapa('post')">📍 Post</button>
+        <button class="btn-slider-tipo" id="btn-sev" onclick="toggleSeveridad()" title="Severidad dNBR · USGS">🟥 Severidad</button>
       </div>
       <div class="slider-toggle-btns" style="border-left:1px solid rgba(255,255,255,0.1);padding-left:8px;">
         <button class="btn-slider-tipo activo" id="btn-rgb" onclick="cambiarTipoSlider('rgb')">RGB</button>
@@ -1813,8 +1814,10 @@
         renderizarTarjetas();
       });
 
+    var capaPre  = null;  // capa "pre-fuego"
     var capaDur  = null;  // capa "durante el incendio"
     var capaPost = null;  // capa "post-fuego"
+    var preActiva  = false;
     var durActiva  = false;
     var postActiva = false;
     var casoActual = null;
@@ -1871,8 +1874,11 @@
       mapa.setView([caso.lat, caso.lng], caso.zoom);
 
       // Resetear estado de botones
+      preActiva  = false;
       durActiva  = false;
       postActiva = false;
+      document.getElementById('btn-pre').classList.remove('activo');
+      document.getElementById('btn-pre').textContent = '🌿 Antes';
       document.getElementById('btn-dur').classList.remove('activo');
       document.getElementById('btn-post').classList.remove('activo');
       document.getElementById('btn-rgb').classList.add('activo');
@@ -1899,7 +1905,23 @@
       console.log('toggleCapa llamado:', cual, '| casoActual:', casoActual, '| caso:', caso);
       if (!caso) return;
 
-      if (cual === 'dur') {
+      if (cual === 'pre') {
+        if (preActiva) {
+          if (capaPre) { mapa.removeLayer(capaPre); capaPre = null; }
+          preActiva = false;
+          document.getElementById('btn-pre').classList.remove('activo');
+          document.getElementById('btn-pre').textContent = '🌿 Antes';
+        } else {
+          document.getElementById('hist-loading').classList.add('visible');
+          capaPre = crearCapaSentinelHist(caso.pre, tipoActual, caso.sev ? caso.sev.bounds : null);
+          capaPre.addTo(mapa);
+          capaPre.bringToFront();
+          capaPre.on('load', function() { document.getElementById('hist-loading').classList.remove('visible'); });
+          preActiva = true;
+          document.getElementById('btn-pre').classList.add('activo');
+          document.getElementById('btn-pre').textContent = '🌿 ' + caso.pre.label;
+        }
+      } else if (cual === 'dur') {
         if (durActiva) {
           if (capaDur) { mapa.removeLayer(capaDur); capaDur = null; }
           durActiva = false;
@@ -1920,7 +1942,7 @@
           if (capaPost) { mapa.removeLayer(capaPost); capaPost = null; }
           postActiva = false;
           document.getElementById('btn-post').classList.remove('activo');
-          document.getElementById('btn-post').textContent = '📍 Post-fuego';
+          document.getElementById('btn-post').textContent = '📍 Post';
         } else {
           document.getElementById('hist-loading').classList.add('visible');
           capaPost = crearCapaSentinelHist(caso.post, tipoActual, caso.sev ? caso.sev.bounds : null);
@@ -1943,6 +1965,11 @@
       document.getElementById('btn-rgb').classList.toggle('activo', tipo === 'rgb');
       document.getElementById('btn-swir').classList.toggle('activo', tipo === 'swir');
 
+      if (preActiva) {
+        if (capaPre) mapa.removeLayer(capaPre);
+        capaPre = crearCapaSentinelHist(caso.pre, tipo, caso.sev ? caso.sev.bounds : null);
+        capaPre.addTo(mapa); capaPre.bringToFront();
+      }
       if (durActiva) {
         if (capaDur) mapa.removeLayer(capaDur);
         capaDur = crearCapaSentinelHist(caso.dur, tipo, caso.sev ? caso.sev.bounds : null);
@@ -2019,12 +2046,15 @@
     window.ajustarBrilloSentinel = ajustarBrilloSentinel;
 
     function cerrarSlider(silencioso) {
+      if (capaPre)       { mapa.removeLayer(capaPre);       capaPre       = null; }
       if (capaDur)       { mapa.removeLayer(capaDur);       capaDur       = null; }
       if (capaPost)      { mapa.removeLayer(capaPost);      capaPost      = null; }
       if (capaSeveridad) { mapa.removeLayer(capaSeveridad); capaSeveridad = null; }
-      durActiva = false; postActiva = false; sevActiva = false;
+      preActiva = false; durActiva = false; postActiva = false; sevActiva = false;
       casoActual = null;
       document.querySelectorAll('.caso-card').forEach(function(c) { c.classList.remove('activo'); });
+      var btnPre = document.getElementById('btn-pre');
+      if (btnPre) { btnPre.classList.remove('activo'); btnPre.textContent = '🌿 Antes'; }
       var btnSev = document.getElementById('btn-sev');
       if (btnSev) btnSev.classList.remove('activo');
       var leySev = document.getElementById('leyenda-sev');
