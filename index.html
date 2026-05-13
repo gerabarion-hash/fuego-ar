@@ -73,7 +73,7 @@
       #nav-btns button { width: 100%; text-align: left; }
     }
 
-    #btn-filtros, #btn-toggle-focos, #btn-faq, #btn-met {
+    #btn-filtros, #btn-toggle-focos, #btn-historico, #btn-ayuda, #btn-stats {
       background: rgba(255,255,255,0.08);
       border: 1px solid rgba(255,255,255,0.15);
       color: #e8e8e8;
@@ -85,7 +85,7 @@
       transition: background .2s;
       white-space: nowrap;
     }
-    #btn-filtros:hover, #btn-toggle-focos:hover, #btn-faq:hover, #btn-met:hover { background: rgba(255,255,255,0.14); }
+    #btn-filtros:hover, #btn-toggle-focos:hover, #btn-historico:hover, #btn-ayuda:hover, #btn-stats:hover { background: rgba(255,255,255,0.14); }
     #btn-toggle-focos.oculto { opacity: 0.4; }
 
     /* ── PANEL FILTROS ────────────────────────────────────────────────────── */
@@ -377,94 +377,7 @@
     }
     .share-copied.visible { opacity: 1; }
 
-    /* ── FAQ MODAL ────────────────────────────────────────────────────────── */
-    #faq-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.75);
-      backdrop-filter: blur(4px);
-      z-index: 3000;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-    #faq-overlay.visible { display: flex; }
-
-    #faq-modal {
-      background: #111;
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 14px;
-      width: 100%;
-      max-width: 600px;
-      max-height: 82vh;
-      overflow-y: auto;
-      padding: 24px;
-      position: relative;
-    }
-
-    #faq-modal::-webkit-scrollbar { width: 5px; }
-    #faq-modal::-webkit-scrollbar-track { background: transparent; }
-    #faq-modal::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
-
-    .faq-header {
-      display: flex; align-items: center; gap: 10px;
-      margin-bottom: 20px;
-    }
-    .faq-header-titulo {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 22px; font-weight: 700; color: #ff6b35;
-    }
-    .faq-header-sub {
-      font-size: 12px; color: rgba(255,255,255,0.35);
-      margin-top: 2px;
-    }
-
-    #btn-cerrar-faq {
-      position: absolute; top: 16px; right: 18px;
-      background: none; border: 1px solid rgba(255,255,255,0.15);
-      color: rgba(255,255,255,0.5); font-size: 14px;
-      padding: 4px 10px; border-radius: 5px;
-      cursor: pointer; font-family: 'Barlow', sans-serif;
-    }
-    #btn-cerrar-faq:hover { border-color: #E24B4A; color: #E24B4A; }
-
-    .faq-item {
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-      padding: 14px 0;
-    }
-    .faq-item:last-child { border-bottom: none; padding-bottom: 0; }
-
-    .faq-pregunta {
-      font-size: 14px; font-weight: 600;
-      color: #e8e8e8; cursor: pointer;
-      display: flex; justify-content: space-between; align-items: flex-start;
-      gap: 12px;
-      user-select: none;
-    }
-    .faq-pregunta:hover { color: #ff6b35; }
-    .faq-chevron { font-size: 12px; opacity: .5; flex-shrink: 0; margin-top: 2px; transition: transform .2s; }
-    .faq-item.open .faq-chevron { transform: rotate(180deg); }
-
-    .faq-respuesta {
-      font-size: 13px;
-      color: rgba(255,255,255,0.55);
-      line-height: 1.65;
-      margin-top: 10px;
-      display: none;
-    }
-    .faq-item.open .faq-respuesta { display: block; }
-
-    .faq-respuesta strong { color: rgba(255,255,255,0.8); }
-    .faq-respuesta em { color: #ff6b35; font-style: normal; }
-
-    .faq-tag {
-      display: inline-block;
-      font-size: 10px; font-weight: 600;
-      padding: 2px 7px; border-radius: 4px;
-      margin-right: 6px; vertical-align: middle;
-      text-transform: uppercase; letter-spacing: .05em;
-    }
+    .faq-tag { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px; margin-right: 6px; vertical-align: middle; text-transform: uppercase; letter-spacing: .05em; }
     .tag-sat { background: rgba(255,107,53,0.2); color: #ff6b35; }
     .tag-datos { background: rgba(255,170,0,0.15); color: #ffaa00; }
     .tag-uso { background: rgba(100,200,100,0.15); color: #80e080; }
@@ -474,27 +387,24 @@
     #leyenda {
       position: absolute;
       bottom: 32px; left: 16px;
-      background: rgba(13,13,13,0.88);
+      background: rgba(13,13,13,0.82);
       backdrop-filter: blur(6px);
-      border: 1px solid rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.07);
       border-radius: 8px;
-      padding: 10px 14px;
+      padding: 8px;
       z-index: 1000;
       pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
     }
-    .ley-titulo {
-      font-family: "Barlow Condensed", sans-serif;
-      font-size: 10px; font-weight: 600;
-      letter-spacing: .08em; text-transform: uppercase;
-      color: rgba(255,255,255,0.35); margin-bottom: 7px;
+    .ley-dot-mini {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,0.3);
     }
-    .ley-fila {
-      display: flex; align-items: center; gap: 8px;
-      font-size: 11px; color: rgba(255,255,255,0.6); margin-bottom: 5px;
-    }
-    .ley-fila:last-child { margin-bottom: 0; }
-    .ley-dot { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.3); flex-shrink: 0; }
-    .ley-sep { margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.06); }
+    .ley-divider { width: 14px; height: 1px; background: rgba(255,255,255,0.1); }
 
     /* ── LOADING HISTÓRICO ───────────────────────────────────────────────── */
     #hist-loading { display: none; font-size: 11px; color: rgba(255,255,255,0.4); align-items: center; gap: 6px; }
@@ -752,84 +662,7 @@
       margin-top: 12px;
     }
 
-    /* ── MODAL METODOLOGÍA ───────────────────────────────────────────────── */
-    #met-overlay {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.75);
-      backdrop-filter: blur(4px);
-      z-index: 3000;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-    #met-overlay.visible { display: flex; }
-    #met-modal {
-      background: #111;
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 14px;
-      width: 100%; max-width: 580px;
-      max-height: 85vh;
-      overflow-y: auto;
-      padding: 24px;
-      position: relative;
-    }
-    #met-modal::-webkit-scrollbar { width: 5px; }
-    #met-modal::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
-    .met-header-titulo {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 22px; font-weight: 700;
-      color: #ff6b35; margin-bottom: 4px;
-    }
-    .met-header-sub { font-size: 12px; color: rgba(255,255,255,0.35); margin-bottom: 20px; }
-    #btn-cerrar-met {
-      position: absolute; top: 16px; right: 18px;
-      background: none; border: 1px solid rgba(255,255,255,0.15);
-      color: rgba(255,255,255,0.5); font-size: 14px;
-      padding: 4px 10px; border-radius: 5px;
-      cursor: pointer; font-family: 'Barlow', sans-serif;
-    }
-    #btn-cerrar-met:hover { border-color: #E24B4A; color: #E24B4A; }
-    .met-section-titulo {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 13px; font-weight: 700;
-      letter-spacing: .06em; text-transform: uppercase;
-      color: rgba(255,255,255,0.4);
-      margin-top: 20px; margin-bottom: 10px;
-      padding-bottom: 6px;
-      border-bottom: 1px solid rgba(255,255,255,0.07);
-    }
-    .met-flujo {
-      display: flex; align-items: center; gap: 6px;
-      flex-wrap: wrap; margin-bottom: 12px;
-    }
-    .met-paso {
-      background: rgba(255,69,0,0.1);
-      border: 1px solid rgba(255,69,0,0.25);
-      border-radius: 6px; padding: 7px 12px;
-      font-size: 12px; color: #ff6b35; font-weight: 600;
-    }
-    .met-arrow { color: rgba(255,255,255,0.2); font-size: 16px; }
-    .met-tabla { width: 100%; border-collapse: collapse; font-size: 12px; }
-    .met-tabla tr { border-bottom: 1px solid rgba(255,255,255,0.05); }
-    .met-tabla tr:last-child { border-bottom: none; }
-    .met-tabla td { padding: 7px 6px; color: rgba(255,255,255,0.55); vertical-align: top; }
-    .met-tabla td:first-child { color: rgba(255,255,255,0.8); font-weight: 600; width: 38%; }
-    .met-formula {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 6px; padding: 10px 14px;
-      font-family: monospace; font-size: 12px;
-      color: #ff6b35; line-height: 1.8;
-      margin-bottom: 10px;
-    }
-    .met-nota {
-      font-size: 11px; color: rgba(255,255,255,0.25);
-      margin-top: 16px; padding-top: 12px;
-      border-top: 1px solid rgba(255,255,255,0.06);
-      line-height: 1.6;
-    }
-    .met-nota a { color: rgba(255,107,53,0.6); text-decoration: none; }
+
 
     /* ── SIDE BY SIDE ────────────────────────────────────────────────────── */
     .leaflet-sbs-range {
@@ -896,8 +729,7 @@
       <button id="btn-filtros" onclick="toggleFiltros()">⚙ Filtros</button>
       <button id="btn-toggle-focos" onclick="toggleFocos()">🔥 Ocultar focos</button>
       <button id="btn-historico" onclick="toggleHistorico()">📂 Casos históricos</button>
-      <button id="btn-faq" onclick="toggleFaq()">? FAQ</button>
-      <button id="btn-met" onclick="toggleMet()">ℹ Sobre</button>
+      <button id="btn-ayuda" onclick="toggleAyuda()">? Ayuda</button>
     </div>
     <div id="contador-header">Focos: <strong id="num-focos">—</strong></div>
   </div>
@@ -916,17 +748,14 @@
 
   <!-- ── LEYENDA ───────────────────────────────────────────────────────────── -->
   <div id="leyenda">
-    <div class="ley-titulo">Confiabilidad del foco</div>
-    <div class="ley-fila"><span class="ley-dot" style="background:rgba(255,69,0,0.3);border-color:#ff4500;"></span>Alta</div>
-    <div class="ley-fila"><span class="ley-dot" style="background:rgba(255,170,0,0.3);border-color:#ffaa00;"></span>Nominal</div>
-    <div class="ley-fila"><span class="ley-dot" style="background:rgba(200,200,200,0.15);border-color:rgba(200,200,200,0.5);"></span>Baja</div>
-    <div class="ley-sep">
-      <div class="ley-titulo" style="margin-bottom:5px;">Intensidad (FRP)</div>
-      <div class="ley-fila">
-        <span class="ley-dot" style="width:8px;height:8px;background:rgba(255,69,0,0.15);border-color:#ff4500;"></span>Baja
-        <span class="ley-dot" style="width:12px;height:12px;background:rgba(255,69,0,0.15);border-color:#ff4500;"></span>Media
-        <span class="ley-dot" style="width:18px;height:18px;background:rgba(255,69,0,0.15);border-color:#ff4500;"></span>Alta
-      </div>
+    <div class="ley-dot-mini" style="background:rgba(255,69,0,0.35);border-color:#ff4500;" title="Alta confiabilidad"></div>
+    <div class="ley-dot-mini" style="background:rgba(255,170,0,0.35);border-color:#ffaa00;" title="Nominal"></div>
+    <div class="ley-dot-mini" style="background:rgba(200,200,200,0.15);border-color:rgba(200,200,200,0.4);" title="Baja confiabilidad"></div>
+    <div class="ley-divider"></div>
+    <div style="display:flex;gap:3px;align-items:center;">
+      <div class="ley-dot-mini" style="width:7px;height:7px;background:rgba(255,69,0,0.15);border-color:#ff4500;" title="FRP bajo"></div>
+      <div class="ley-dot-mini" style="width:11px;height:11px;background:rgba(255,69,0,0.15);border-color:#ff4500;" title="FRP medio"></div>
+      <div class="ley-dot-mini" style="width:15px;height:15px;background:rgba(255,69,0,0.15);border-color:#ff4500;" title="FRP alto"></div>
     </div>
   </div>
 
@@ -1045,159 +874,123 @@
     </div>
   </div>
 
-  <!-- ── MODAL METODOLOGÍA ─────────────────────────────────────────────────── -->
-  <div id="met-overlay" onclick="cerrarMetOverlay(event)">
-    <div id="met-modal">
-      <button id="btn-cerrar-met" onclick="toggleMet()">✕ Cerrar</button>
-      <div class="met-header-titulo">ℹ Sobre FuegoAR</div>
-      <div class="met-header-sub">Stack técnico · metodología de análisis · fuentes de datos</div>
+  <!-- ── MODAL AYUDA (FAQ + Sobre) ─────────────────────────────────────── -->
+  <div id="ayuda-overlay" onclick="cerrarAyudaOverlay(event)">
+    <div id="ayuda-modal">
+      <button id="btn-cerrar-ayuda" onclick="toggleAyuda()">✕ Cerrar</button>
 
-      <div class="met-section-titulo">¿Qué es?</div>
-      <p style="font-size:13px;color:rgba(255,255,255,0.55);line-height:1.7;margin-bottom:8px;">
-        FuegoAR es una plataforma web de monitoreo satelital de incendios forestales en Argentina.
-        Combina detección de focos activos en tiempo real con análisis histórico de severidad de daño,
-        desarrollada como herramienta pública y portfolio GIS profesional.
-      </p>
-
-      <div class="met-section-titulo">Flujo técnico</div>
-      <div class="met-flujo">
-        <div class="met-paso">NASA FIRMS<br><span style="font-size:10px;opacity:.6;">focos activos</span></div>
-        <div class="met-arrow">→</div>
-        <div class="met-paso">Sentinel-2<br><span style="font-size:10px;opacity:.6;">verificación visual</span></div>
-        <div class="met-arrow">→</div>
-        <div class="met-paso">Google Earth Engine<br><span style="font-size:10px;opacity:.6;">análisis dNBR/NDVI</span></div>
-        <div class="met-arrow">→</div>
-        <div class="met-paso">titiler + R2<br><span style="font-size:10px;opacity:.6;">servicio web</span></div>
+      <!-- Tabs -->
+      <div class="ayuda-tabs">
+        <button class="ayuda-tab activo" id="tab-faq" onclick="switchTab('faq')">🔥 Preguntas frecuentes</button>
+        <button class="ayuda-tab" id="tab-sobre" onclick="switchTab('sobre')">ℹ Sobre el proyecto</button>
       </div>
 
-      <div class="met-section-titulo">Índice de severidad (dNBR)</div>
-      <div class="met-formula">
-        NBR = (B8 − B12) / (B8 + B12)<br>
-        dNBR = NBR<sub>pre-fuego</sub> − NBR<sub>post-fuego</sub>
+      <!-- Tab FAQ -->
+      <div class="ayuda-tab-content visible" id="content-faq">
+        <div class="faq-item">
+          <div class="faq-pregunta" onclick="toggleFaqItem(this)">
+            <span><span class="faq-tag tag-sat">Satélite</span>Veo un foco activo pero en Sentinel-2 no aparece la cicatriz. ¿Por qué?</span>
+            <span class="faq-chevron">▼</span>
+          </div>
+          <div class="faq-respuesta">
+            Focos activos y cicatrices se detectan en <em>momentos diferentes</em> y con <em>sensores diferentes</em>.<br><br>
+            <strong>El foco activo</strong> lo detecta VIIRS (NASA) en infrarrojo térmico — mide el calor en tiempo casi real (2 veces por día).<br><br>
+            <strong>La cicatriz</strong> la ves en Sentinel-2 (SWIR/óptico) solo después de que el fuego pasó y el satélite capturó la zona sin nubes. Puede tardar <strong>3 a 10 días</strong>. Usá los botones anterior / más cercana / posterior en el panel Sentinel.
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-pregunta" onclick="toggleFaqItem(this)">
+            <span><span class="faq-tag tag-datos">Datos</span>¿Con qué frecuencia se actualizan los focos activos?</span>
+            <span class="faq-chevron">▼</span>
+          </div>
+          <div class="faq-respuesta">
+            Datos de VIIRS (NOAA-20 y NOAA-21). Cada satélite pasa sobre Argentina <strong>~2 veces por día</strong>. Los datos se publican en NASA FIRMS con <strong>3 a 6 horas</strong> de retraso. La app carga los focos más recientes al abrir.
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-pregunta" onclick="toggleFaqItem(this)">
+            <span><span class="faq-tag tag-datos">Datos</span>¿Qué significa confiabilidad Alta, Nominal y Baja?</span>
+            <span class="faq-chevron">▼</span>
+          </div>
+          <div class="faq-respuesta">
+            <strong>Alta (rojo)</strong> — alta certeza de incendio real.<br>
+            <strong>Nominal (amarillo)</strong> — probable, puede incluir techos calientes, quemas de rastrojo o industria. Verificar con Sentinel.<br>
+            <strong>Baja (gris)</strong> — mucha incertidumbre, desactivada por defecto.
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-pregunta" onclick="toggleFaqItem(this)">
+            <span><span class="faq-tag tag-sat">Satélite</span>¿Qué diferencia hay entre RGB y SWIR?</span>
+            <span class="faq-chevron">▼</span>
+          </div>
+          <div class="faq-respuesta">
+            <strong>RGB</strong> — color real, como lo vería el ojo humano. El humo puede tapar el fuego.<br><br>
+            <strong>SWIR</strong> — infrarrojo de onda corta. El fuego activo aparece en <em>rojo brillante</em> y las cicatrices en negro/marrón, aunque el humo las tape en RGB. Es la imagen más útil para análisis de incendios.
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-pregunta" onclick="toggleFaqItem(this)">
+            <span><span class="faq-tag tag-datos">Datos</span>¿Qué es el FRP?</span>
+            <span class="faq-chevron">▼</span>
+          </div>
+          <div class="faq-respuesta">
+            <strong>Fire Radiative Power</strong> — energía infrarroja emitida por el incendio en megawatts (MW). A mayor FRP, más intenso el fuego.<br><br>
+            0–10 MW: quemas menores · 10–50 MW: forestal activo · &gt;100 MW: incendio severo.
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-pregunta" onclick="toggleFaqItem(this)">
+            <span><span class="faq-tag tag-uso">Uso</span>¿Los datos son oficiales? ¿Puedo reportar un incendio?</span>
+            <span class="faq-chevron">▼</span>
+          </div>
+          <div class="faq-respuesta">
+            Los datos vienen de <em>NASA FIRMS</em> — misma fuente que usan CONAE, Parques Nacionales y el SNMF.<br><br>
+            Para reportar un incendio activo llamá al <em>0800-555-6624</em> (emergencias forestales, gratuito). Esta app es una herramienta de monitoreo, no reemplaza los canales oficiales.
+          </div>
+        </div>
       </div>
-      <p style="font-size:12px;color:rgba(255,255,255,0.4);line-height:1.6;margin-bottom:8px;">
-        Máscara SCL aplicada para excluir agua, nieve y nubes — crítico en la cordillera patagónica.
-        Clasificación USGS de 6 niveles (Key &amp; Benson, 2006).
-      </p>
 
-      <div class="met-section-titulo">Stack de tecnologías</div>
-      <table class="met-tabla">
-        <tr><td>Frontend</td><td>HTML5 + Leaflet.js — sin frameworks, carga rápida</td></tr>
-        <tr><td>Focos activos</td><td>NASA FIRMS API — VIIRS NOAA-20 y NOAA-21 NRT</td></tr>
-        <tr><td>Imágenes satelitales</td><td>Sentinel Hub WMS · Copernicus Data Space</td></tr>
-        <tr><td>Catálogo STAC</td><td>Element84 Earth Search (AWS) — CORS nativo</td></tr>
-        <tr><td>Análisis histórico</td><td>Google Earth Engine — S2_SR_HARMONIZED</td></tr>
-        <tr><td>Rasters web</td><td>titiler + Cloudflare R2 — COG sin redirecciones</td></tr>
-        <tr><td>Límite geográfico</td><td>Algoritmo punto-en-polígono client-side</td></tr>
-        <tr><td>Hosting</td><td>GitHub Pages — deploy automático en cada push</td></tr>
-      </table>
-
-      <div class="met-nota">
-        Desarrollado por <strong style="color:rgba(255,255,255,0.6);">Gera Barion</strong> — GIS &amp; Geospatial Web Developer.<br>
-        Datos: NASA FIRMS · Copernicus / ESA · Google Earth Engine.<br>
-        Código fuente: <a href="https://github.com/gerabarion-hash/fuego-ar" target="_blank">github.com/gerabarion-hash/fuego-ar</a>
+      <!-- Tab Sobre -->
+      <div class="ayuda-tab-content" id="content-sobre">
+        <div class="met-section-titulo">¿Qué es?</div>
+        <p style="font-size:13px;color:rgba(255,255,255,0.55);line-height:1.7;margin-bottom:8px;">
+          FuegoAR es una plataforma web de monitoreo satelital de incendios forestales en Argentina.
+          Combina detección de focos activos en tiempo real con análisis histórico de severidad,
+          desarrollada como herramienta pública y portfolio GIS profesional.
+        </p>
+        <div class="met-section-titulo">Flujo técnico</div>
+        <div class="met-flujo">
+          <div class="met-paso">NASA FIRMS<br><span style="font-size:10px;opacity:.6">focos activos</span></div>
+          <div class="met-arrow">→</div>
+          <div class="met-paso">Sentinel-2<br><span style="font-size:10px;opacity:.6">verificación visual</span></div>
+          <div class="met-arrow">→</div>
+          <div class="met-paso">Google Earth Engine<br><span style="font-size:10px;opacity:.6">análisis dNBR/NDVI</span></div>
+          <div class="met-arrow">→</div>
+          <div class="met-paso">titiler + R2<br><span style="font-size:10px;opacity:.6">servicio web</span></div>
+        </div>
+        <div class="met-section-titulo">Índice de severidad (dNBR)</div>
+        <div class="met-formula">
+          NBR = (B8 − B12) / (B8 + B12)<br>
+          dNBR = NBR<sub>pre-fuego</sub> − NBR<sub>post-fuego</sub>
+        </div>
+        <div class="met-section-titulo">Stack de tecnologías</div>
+        <table class="met-tabla">
+          <tr><td>Frontend</td><td>HTML5 + Leaflet.js — sin frameworks</td></tr>
+          <tr><td>Focos activos</td><td>NASA FIRMS API — VIIRS NOAA-20 y NOAA-21 NRT</td></tr>
+          <tr><td>Imágenes</td><td>Sentinel Hub WMS · Copernicus Data Space</td></tr>
+          <tr><td>Catálogo STAC</td><td>Element84 Earth Search (AWS)</td></tr>
+          <tr><td>Análisis histórico</td><td>Google Earth Engine — S2_SR_HARMONIZED</td></tr>
+          <tr><td>Rasters web</td><td>titiler + Cloudflare R2 — COG</td></tr>
+          <tr><td>Hosting</td><td>GitHub Pages</td></tr>
+        </table>
+        <div class="met-nota">
+          Desarrollado por <strong style="color:rgba(255,255,255,0.6)">Gera Barion</strong> — GIS &amp; Geospatial Web Developer.<br>
+          Código: <a href="https://github.com/gerabarion-hash/fuego-ar" target="_blank">github.com/gerabarion-hash/fuego-ar</a>
+        </div>
       </div>
+
     </div>
   </div>
-
-  <!-- ── FAQ MODAL ─────────────────────────────────────────────────────────── -->
-  <div id="faq-overlay" onclick="cerrarFaqOverlay(event)">
-    <div id="faq-modal">
-      <button id="btn-cerrar-faq" onclick="toggleFaq()">✕ Cerrar</button>
-      <div class="faq-header">
-        <div>
-          <div class="faq-header-titulo">🔥 Preguntas frecuentes</div>
-          <div class="faq-header-sub">Cómo interpretar los datos · Satélites · Funcionamiento de la app</div>
-        </div>
-      </div>
-
-      <div class="faq-item">
-        <div class="faq-pregunta" onclick="toggleFaqItem(this)">
-          <span><span class="faq-tag tag-sat">Satélite</span>Veo un foco activo en el mapa, pero al ver la imagen Sentinel-2 no aparece la cicatriz de quemadura. ¿Por qué?</span>
-          <span class="faq-chevron">▼</span>
-        </div>
-        <div class="faq-respuesta">
-          Es una de las confusiones más frecuentes y tiene una explicación técnica clara: los focos activos y las cicatrices de quemadura se detectan en <em>momentos diferentes</em> y con <em>sensores diferentes</em>.<br><br>
-          <strong>El foco activo</strong> lo detecta el satélite VIIRS (NASA) en el <strong>infrarrojo térmico</strong> — básicamente, mide el calor que emite el fuego en el momento exacto del pasaje del satélite (2 veces por día sobre Argentina). Es una detección casi en tiempo real.<br><br>
-          <strong>La cicatriz de quemadura</strong> la ves en Sentinel-2, que trabaja en el <strong>infrarrojo de onda corta (SWIR)</strong> y en luz visible. Para que aparezca la cicatriz necesitás que el fuego ya haya pasado, que el satélite haya capturado esa zona después de la quema, y que no haya nubes tapando el área.<br><br>
-          En resumen: podés ver un foco activo hoy y recién ver la cicatriz en Sentinel-2 <strong>3 a 10 días después</strong>, cuando el satélite pase nuevamente por esa zona sin nubosidad. Usá el botón <em>☁ anterior / más cercana / posterior</em> en el panel de Sentinel para explorar imágenes de días distintos.
-        </div>
-      </div>
-
-      <div class="faq-item">
-        <div class="faq-pregunta" onclick="toggleFaqItem(this)">
-          <span><span class="faq-tag tag-datos">Datos</span>¿Con qué frecuencia se actualizan los focos activos?</span>
-          <span class="faq-chevron">▼</span>
-        </div>
-        <div class="faq-respuesta">
-          Los datos provienen de los satélites <em>VIIRS a bordo de NOAA-20 y NOAA-21</em>, operados por NASA. Cada satélite sobrevuela Argentina <strong>aproximadamente 2 veces por día</strong> (una pasada de día y una de noche). Los datos se publican en la plataforma NASA FIRMS con un retraso de <strong>3 a 6 horas</strong> desde el pasaje del satélite.<br><br>
-          La app carga por defecto los focos más recientes. Podés elegir una fecha específica con el calendario para ver incendios de días anteriores.
-        </div>
-      </div>
-
-      <div class="faq-item">
-        <div class="faq-pregunta" onclick="toggleFaqItem(this)">
-          <span><span class="faq-tag tag-datos">Datos</span>¿Qué significa la confiabilidad Alta, Nominal y Baja?</span>
-          <span class="faq-chevron">▼</span>
-        </div>
-        <div class="faq-respuesta">
-          Es la clasificación del algoritmo de NASA sobre la probabilidad de que la detección sea un incendio real y no un <strong>falso positivo</strong>.<br><br>
-          <strong>Alta (rojo)</strong> — el algoritmo tiene alta certeza. Es el dato más confiable para alertas inmediatas.<br>
-          <strong>Nominal (amarillo)</strong> — probable incendio, pero puede incluir superficies muy calientes como techos metálicos, quemas de rastrojo o gases industriales. Vale la pena verificar con la imagen Sentinel.<br>
-          <strong>Baja (gris)</strong> — mucha incertidumbre. Suelen aparecer en zonas áridas, playas y desiertos con temperatura superficial alta. Por defecto está desactivada.
-        </div>
-      </div>
-
-      <div class="faq-item">
-        <div class="faq-pregunta" onclick="toggleFaqItem(this)">
-          <span><span class="faq-tag tag-sat">Satélite</span>¿Qué diferencia hay entre la imagen en color real y la imagen SWIR?</span>
-          <span class="faq-chevron">▼</span>
-        </div>
-        <div class="faq-respuesta">
-          <strong>Color real (True Color)</strong> muestra lo que el ojo humano vería desde el espacio: vegetación verde, suelo marrón, nieve blanca, humo gris. Muy intuitiva pero el fuego activo puede quedar oculto bajo el humo.<br><br>
-          <strong>SWIR (Short Wave InfraRed)</strong> combina bandas infrarrojas de onda corta con el rojo visible. En esta composición, <em>las zonas con fuego activo aparecen en rojo brillante y las cicatrices de quemadura en marrón oscuro o negro</em>, aunque el humo las tape en color real. Es la imagen más útil para análisis de incendios.
-        </div>
-      </div>
-
-      <div class="faq-item">
-        <div class="faq-pregunta" onclick="toggleFaqItem(this)">
-          <span><span class="faq-tag tag-datos">Datos</span>¿Qué es el FRP y para qué sirve el filtro?</span>
-          <span class="faq-chevron">▼</span>
-        </div>
-        <div class="faq-respuesta">
-          <em>FRP</em> son las siglas de <strong>Fire Radiative Power</strong> — Potencia Radiativa del Fuego. Mide la energía infrarroja que emite un incendio, expresada en <strong>megawatts (MW)</strong>. Es un proxy directo de la intensidad del fuego en el momento del pasaje del satélite.<br><br>
-          <strong>0–10 MW</strong> — quemas de pastizal, fogones, pequeños focos.<br>
-          <strong>10–50 MW</strong> — incendios forestales activos de tamaño moderado.<br>
-          <strong>50–200 MW</strong> — frentes de fuego grandes, incendios severos.<br>
-          <strong>&gt;200 MW</strong> — eventos extremos (como los incendios de Corrientes 2022 o Los Alerces 2025).<br><br>
-          Subir el umbral del filtro te permite enfocarte solo en los incendios relevantes y descartar el "ruido" de quemas menores.
-        </div>
-      </div>
-
-      <div class="faq-item">
-        <div class="faq-pregunta" onclick="toggleFaqItem(this)">
-          <span><span class="faq-tag tag-uso">Uso</span>¿Cada cuánto se renueva la imagen Sentinel-2?</span>
-          <span class="faq-chevron">▼</span>
-        </div>
-        <div class="faq-respuesta">
-          Sentinel-2 tiene una <strong>revisita de 5 días</strong> sobre Argentina (con los dos satélites, S2A y S2B). Eso significa que para cualquier punto del país hay una imagen nueva cada 5 días aproximadamente — si no hay nubes.<br><br>
-          En zonas de alta nubosidad (norte de Argentina, Patagonia en invierno) puede pasar más tiempo hasta tener una imagen útil. En la app podés ver los botones <em>anterior / más cercana / posterior</em> que muestran las fechas reales disponibles del catálogo de satélites.
-        </div>
-      </div>
-
-      <div class="faq-item">
-        <div class="faq-pregunta" onclick="toggleFaqItem(this)">
-          <span><span class="faq-tag tag-uso">Uso</span>¿Los datos son oficiales? ¿Puedo usarlos para reportar un incendio?</span>
-          <span class="faq-chevron">▼</span>
-        </div>
-        <div class="faq-respuesta">
-          Los datos de focos activos provienen directamente de <em>NASA FIRMS</em>, una plataforma científica oficial usada por gobiernos, bomberos y ONGs de todo el mundo. Son los mismos datos que usan CONAE, Parques Nacionales y el Servicio Nacional de Manejo del Fuego (SNMF) en Argentina.<br><br>
-          <strong>Para reportar un incendio activo</strong> llamá al <em>0800-555-6624</em> (línea gratuita de emergencias forestales) o contactá a los bomberos locales. Esta app es una herramienta de monitoreo y visualización, no reemplaza los canales oficiales de emergencia.
-        </div>
-      </div>
-
-    </div><!-- #faq-modal -->
-  </div><!-- #faq-overlay -->
 
   <div id="loading">Cargando focos de NASA...</div>
   <div id="mapa"></div>
@@ -1327,24 +1120,32 @@
     window.moverDia = moverDia;
     window.limpiarFecha = limpiarFecha;
     // ── Modal metodología ─────────────────────────────────────────────────────
-    function toggleMet() {
-      var ov = document.getElementById('met-overlay');
+    // ── Modal Ayuda (FAQ + Sobre fusionados) ──────────────────────────────────
+    function toggleAyuda() {
+      var ov = document.getElementById('ayuda-overlay');
       ov.classList.toggle('visible');
       document.getElementById('panel-filtros').classList.remove('visible');
-      document.getElementById('faq-overlay').classList.remove('visible');
       document.getElementById('panel-historico').classList.remove('visible');
     }
-    function cerrarMetOverlay(e) {
-      if (e.target === document.getElementById('met-overlay')) toggleMet();
+    function cerrarAyudaOverlay(e) {
+      if (e.target === document.getElementById('ayuda-overlay')) toggleAyuda();
     }
-    window.toggleMet = toggleMet;
+    function switchTab(tab) {
+      ['faq','sobre'].forEach(function(t) {
+        document.getElementById('tab-' + t).classList.toggle('activo', t === tab);
+        document.getElementById('content-' + t).classList.toggle('visible', t === tab);
+      });
+    }
+    window.toggleAyuda = toggleAyuda;
+    window.cerrarAyudaOverlay = cerrarAyudaOverlay;
+    window.switchTab = switchTab;
 
     function toggleFaq() {
-      document.getElementById('faq-overlay').classList.toggle('visible');
+      document.getElementById('ayuda-overlay').classList.toggle('visible');
       document.getElementById('panel-filtros').classList.remove('visible');
     }
     function cerrarFaqOverlay(e) {
-      if (e.target === document.getElementById('faq-overlay')) toggleFaq();
+      if (e.target === document.getElementById('ayuda-overlay')) toggleAyuda();
     }
     function toggleFaqItem(el) {
       var item = el.parentElement;
@@ -1356,7 +1157,7 @@
     // ── UI general ────────────────────────────────────────────────────────────
     function toggleFiltros() {
       document.getElementById('panel-filtros').classList.toggle('visible');
-      document.getElementById('faq-overlay').classList.remove('visible');
+      document.getElementById('ayuda-overlay').classList.remove('visible');
     }
     function toggleFocos() {
       focosVisibles = !focosVisibles;
@@ -1828,14 +1629,51 @@
       panel.classList.toggle('visible');
       document.getElementById('btn-historico').classList.toggle('activo', panel.classList.contains('visible'));
       document.getElementById('panel-filtros').classList.remove('visible');
-      document.getElementById('faq-overlay').classList.remove('visible');
+      document.getElementById('ayuda-overlay').classList.remove('visible');
     }
 
     // Crea una capa WMS Sentinel-2. ventana = días de margen para mosaiquear tiles adyacentes
-    function crearCapaSentinelHist(fechaObj, tipo, bounds) {
+    // Crea capa WMS Sentinel-2.
+    // Para 'pre': ventana amplia hacia atrás (30 días) — garantiza imagen disponible
+    // Para 'dur' y 'post': ventana ajustada según el objeto fechaObj
+    function crearCapaSentinelHist(fechaObj, tipo, bounds, esPreFuego) {
+      var layerName = tipo === 'swir' ? 'SWIR' : 'TRUE_COLOR';
+      var desde, hasta;
+
+      if (esPreFuego) {
+        // Ventana de 30 días antes de la fecha pre → siempre encuentra imagen limpia
+        desde = addDays(fechaObj.fecha, -30);
+        hasta = fechaObj.fecha;
+      } else {
+        desde = addDays(fechaObj.fecha, -fechaObj.ventana);
+        hasta = addDays(fechaObj.fecha,  fechaObj.ventana);
+      }
+
+      var opts = {
+        layers: layerName,
+        format: 'image/jpeg',
+        transparent: false,
+        time: desde + 'T00:00:00.000Z/' + hasta + 'T23:59:59.000Z',
+        maxcc: 30, // más estricto para pre-fuego — queremos imagen limpia
+        tileSize: 512,
+        MOSAICKING_ORDER: 'leastCC', // para pre: preferir el pixel con menos nubes
+        attribution: 'Sentinel-2 L2A · Copernicus ESA'
+      };
+
+      // Si no hay bounds del TIFF, usar coordenadas del caso como fallback
+      if (bounds) {
+        opts.bounds = L.latLngBounds(bounds);
+      }
+
+      return L.tileLayer.wms('https://sh.dataspace.copernicus.eu/ogc/wms/' + INSTANCE_ID, opts);
+    }
+
+    // Crea capa para durante/post — usa mostRecentPixel para mosaiquear bien
+    function crearCapaSentinelActiva(fechaObj, tipo, bounds) {
       var layerName = tipo === 'swir' ? 'SWIR' : 'TRUE_COLOR';
       var desde = addDays(fechaObj.fecha, -fechaObj.ventana);
       var hasta = addDays(fechaObj.fecha,  fechaObj.ventana);
+
       var opts = {
         layers: layerName,
         format: 'image/jpeg',
@@ -1913,7 +1751,7 @@
           document.getElementById('btn-pre').textContent = '🌿 Antes';
         } else {
           document.getElementById('hist-loading').classList.add('visible');
-          capaPre = crearCapaSentinelHist(caso.pre, tipoActual, caso.sev ? caso.sev.bounds : null);
+          capaPre = crearCapaSentinelHist(caso.pre, tipoActual, caso.sev ? caso.sev.bounds : null, true);
           capaPre.addTo(mapa);
           capaPre.bringToFront();
           capaPre.on('load', function() { document.getElementById('hist-loading').classList.remove('visible'); });
@@ -1967,7 +1805,7 @@
 
       if (preActiva) {
         if (capaPre) mapa.removeLayer(capaPre);
-        capaPre = crearCapaSentinelHist(caso.pre, tipo, caso.sev ? caso.sev.bounds : null);
+        capaPre = crearCapaSentinelHist(caso.pre, tipo, caso.sev ? caso.sev.bounds : null, true);
         capaPre.addTo(mapa); capaPre.bringToFront();
       }
       if (durActiva) {
@@ -2084,7 +1922,7 @@
     // Evitar que Leaflet capture los clicks de todos los paneles
     // Se aplica tanto al init como cuando se hace visible el slider-panel
     function bloquearLeaflet() {
-      ['slider-panel', 'panel-historico', 'panel-filtros', 'sentinel-panel', 'faq-overlay', 'met-overlay'].forEach(function(id) {
+      ['slider-panel', 'panel-historico', 'panel-filtros', 'sentinel-panel', 'ayuda-overlay'].forEach(function(id) {
         var el = document.getElementById(id);
         if (el) {
           L.DomEvent.disableClickPropagation(el);
