@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet-side-by-side@2.0.0/leaflet-side-by-side.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -664,6 +665,63 @@
 
 
 
+    /* ── MODAL ESTADÍSTICAS ──────────────────────────────────────────────── */
+    #stats-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.78);
+      backdrop-filter: blur(4px);
+      z-index: 3000; display: none;
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    #stats-overlay.visible { display: flex; }
+    #stats-modal {
+      background: #111;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 14px;
+      width: 100%; max-width: 700px;
+      max-height: 88vh; overflow-y: auto;
+      padding: 24px 26px; position: relative;
+    }
+    #stats-modal::-webkit-scrollbar { width: 5px; }
+    #stats-modal::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+    .stats-titulo {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 22px; font-weight: 700;
+      color: #ff6b35; margin-bottom: 4px;
+    }
+    .stats-sub { font-size: 12px; color: rgba(255,255,255,0.3); margin-bottom: 20px; }
+    .stats-kpis { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+    .stats-kpi {
+      flex: 1; min-width: 100px;
+      background: rgba(255,69,0,0.08);
+      border: 1px solid rgba(255,69,0,0.2);
+      border-radius: 10px; padding: 14px 16px; text-align: center;
+    }
+    .stats-kpi-num {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 30px; font-weight: 700;
+      color: #ff6b35; line-height: 1;
+    }
+    .stats-kpi-label { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 5px; line-height: 1.4; }
+    .stats-section {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 12px; font-weight: 700;
+      letter-spacing: .08em; text-transform: uppercase;
+      color: rgba(255,255,255,0.35);
+      margin: 20px 0 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .chart-wrap { position: relative; height: 220px; margin-bottom: 8px; }
+    #btn-cerrar-stats {
+      position: absolute; top: 16px; right: 18px;
+      background: none; border: 1px solid rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.5); font-size: 13px;
+      padding: 3px 10px; border-radius: 5px;
+      cursor: pointer; font-family: 'Barlow', sans-serif;
+    }
+    #btn-cerrar-stats:hover { border-color: #E24B4A; color: #E24B4A; }
+
     /* ── SIDE BY SIDE ────────────────────────────────────────────────────── */
     .leaflet-sbs-range {
       -webkit-appearance: none;
@@ -729,6 +787,7 @@
       <button id="btn-filtros" onclick="toggleFiltros()">⚙ Filtros</button>
       <button id="btn-toggle-focos" onclick="toggleFocos()">🔥 Ocultar focos</button>
       <button id="btn-historico" onclick="toggleHistorico()">📂 Casos históricos</button>
+      <button id="btn-stats" onclick="toggleStats()">📊 Estadísticas</button>
       <button id="btn-ayuda" onclick="toggleAyuda()">? Ayuda</button>
     </div>
     <div id="contador-header">Focos: <strong id="num-focos">—</strong></div>
@@ -992,6 +1051,44 @@
     </div>
   </div>
 
+  <!-- ── MODAL ESTADÍSTICAS ────────────────────────────────────────────────── -->
+  <div id="stats-overlay" onclick="cerrarStatsOverlay(event)">
+    <div id="stats-modal">
+      <button id="btn-cerrar-stats" onclick="toggleStats()">✕ Cerrar</button>
+      <div class="stats-titulo">📊 Estadísticas</div>
+      <div class="stats-sub">Incendios históricos documentados en FuegoAR · datos satelitales NASA / ESA</div>
+
+      <!-- KPIs -->
+      <div class="stats-kpis" id="stats-kpis">
+        <div class="stats-kpi">
+          <div class="stats-kpi-num" id="kpi-ha">—</div>
+          <div class="stats-kpi-label">hectáreas<br>documentadas</div>
+        </div>
+        <div class="stats-kpi">
+          <div class="stats-kpi-num" id="kpi-casos">—</div>
+          <div class="stats-kpi-label">casos<br>analizados</div>
+        </div>
+        <div class="stats-kpi">
+          <div class="stats-kpi-num" id="kpi-anos">—</div>
+          <div class="stats-kpi-label">años<br>cubiertos</div>
+        </div>
+        <div class="stats-kpi">
+          <div class="stats-kpi-num" id="kpi-prov">—</div>
+          <div class="stats-kpi-label">provincias<br>afectadas</div>
+        </div>
+      </div>
+
+      <!-- Gráfico hectáreas por caso -->
+      <div class="stats-section">Hectáreas afectadas por caso</div>
+      <div class="chart-wrap"><canvas id="chart-ha"></canvas></div>
+
+      <!-- Gráfico línea de tiempo -->
+      <div class="stats-section">Línea de tiempo</div>
+      <div class="chart-wrap" style="height:140px;"><canvas id="chart-tiempo"></canvas></div>
+
+    </div>
+  </div>
+
   <div id="loading">Cargando focos de NASA...</div>
   <div id="mapa"></div>
 
@@ -1120,6 +1217,282 @@
     window.moverDia = moverDia;
     window.limpiarFecha = limpiarFecha;
     // ── Modal metodología ─────────────────────────────────────────────────────
+    // ── Estadísticas ──────────────────────────────────────────────────────────
+    var chartHa = null;
+    var chartTiempo = null;
+
+    function toggleStats() {
+      var ov = document.getElementById('stats-overlay');
+      var abriendo = !ov.classList.contains('visible');
+      ov.classList.toggle('visible');
+      document.getElementById('panel-filtros').classList.remove('visible');
+      document.getElementById('panel-historico').classList.remove('visible');
+      document.getElementById('ayuda-overlay').classList.remove('visible');
+      if (abriendo) renderStats();
+    }
+    function cerrarStatsOverlay(e) {
+      if (e.target === document.getElementById('stats-overlay')) toggleStats();
+    }
+
+    function renderStats() {
+      if (!CASOS) return;
+      var keys = Object.keys(CASOS);
+      var nombres = [], has = [], colores = [], años = [];
+
+      var totalHa = 0, minAno = 9999, maxAno = 0;
+      var provinciasSet = {};
+
+      keys.forEach(function(id) {
+        var c = CASOS[id];
+        var ha = c.ha_total || 0;
+        var ano = parseInt((c.inicio || '').match(/\d{4}/) ? (c.inicio.match(/\d{4}/) || ['0'])[0] : '0');
+
+        nombres.push(c.nombre.length > 22 ? c.nombre.slice(0,20) + '…' : c.nombre);
+        has.push(ha);
+        colores.push(ha > 100000 ? '#ff4500' : ha > 20000 ? '#ff8c00' : '#ffcc00');
+        años.push(ano);
+        totalHa += ha;
+        if (ano > 0) { if (ano < minAno) minAno = ano; if (ano > maxAno) maxAno = ano; }
+
+        // Provincias
+        (c.lugar || '').split('·').forEach(function(p) {
+          var prov = p.trim().split(/\s+/).pop();
+          if (prov && prov.length > 2) provinciasSet[prov] = 1;
+        });
+      });
+
+      // KPIs
+      document.getElementById('kpi-ha').textContent = (totalHa / 1000).toFixed(0) + 'K';
+      document.getElementById('kpi-casos').textContent = keys.length;
+      document.getElementById('kpi-anos').textContent = minAno === 9999 ? '—' : (minAno === maxAno ? minAno : minAno + '–' + maxAno);
+      document.getElementById('kpi-prov').textContent = Object.keys(provinciasSet).length;
+
+      // Destruir charts anteriores
+      if (chartHa) { chartHa.destroy(); chartHa = null; }
+      if (chartTiempo) { chartTiempo.destroy(); chartTiempo = null; }
+
+      Chart.defaults.color = 'rgba(255,255,255,0.45)';
+      Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
+
+      // Chart 1 — hectáreas por caso
+      chartHa = new Chart(document.getElementById('chart-ha'), {
+        type: 'bar',
+        data: {
+          labels: nombres,
+          datasets: [{
+            data: has,
+            backgroundColor: colores,
+            borderRadius: 4,
+            borderSkipped: false
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(ctx) {
+                  var v = ctx.parsed.y;
+                  return v ? v.toLocaleString('es-AR') + ' ha' : 'Sin datos';
+                }
+              }
+            }
+          },
+          scales: {
+            x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+            y: {
+              ticks: {
+                callback: function(v) { return v >= 1000 ? (v/1000).toFixed(0) + 'K' : v; },
+                font: { size: 10 }
+              }
+            }
+          }
+        }
+      });
+
+      // Chart 2 — línea de tiempo (scatter)
+      var puntosTimeline = años.map(function(a, i) {
+        return { x: a, y: 0.5, nombre: nombres[i], ha: has[i] };
+      }).filter(function(p) { return p.x > 0; });
+
+      chartTiempo = new Chart(document.getElementById('chart-tiempo'), {
+        type: 'scatter',
+        data: {
+          datasets: [{
+            data: puntosTimeline,
+            backgroundColor: puntosTimeline.map(function(p) {
+              return p.ha > 100000 ? '#ff4500' : p.ha > 20000 ? '#ff8c00' : '#ffcc00';
+            }),
+            pointRadius: puntosTimeline.map(function(p) {
+              return p.ha > 100000 ? 14 : p.ha > 20000 ? 10 : 7;
+            }),
+            pointHoverRadius: 16
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(ctx) {
+                  var d = ctx.raw;
+                  return d.nombre + (d.ha ? ' · ' + d.ha.toLocaleString('es-AR') + ' ha' : '');
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              type: 'linear', min: 2019, max: 2027,
+              ticks: { stepSize: 1, callback: function(v) { return v; }, font: { size: 11 } },
+              grid: { color: 'rgba(255,255,255,0.05)' }
+            },
+            y: { display: false, min: 0, max: 1 }
+          }
+        }
+      });
+    }
+
+    window.toggleStats = toggleStats;
+    window.cerrarStatsOverlay = cerrarStatsOverlay;
+
+    // ── Modal Estadísticas ────────────────────────────────────────────────────
+    var chartHa = null;
+    var chartTiempo = null;
+
+    function toggleStats() {
+      var ov = document.getElementById('stats-overlay');
+      var yaVisible = ov.classList.contains('visible');
+      ov.classList.toggle('visible');
+      document.getElementById('panel-filtros').classList.remove('visible');
+      document.getElementById('panel-historico').classList.remove('visible');
+      document.getElementById('ayuda-overlay').classList.remove('visible');
+      if (!yaVisible) renderStats();
+    }
+    function cerrarStatsOverlay(e) {
+      if (e.target === document.getElementById('stats-overlay')) toggleStats();
+    }
+
+    function renderStats() {
+      if (!CASOS) return;
+      var keys = Object.keys(CASOS);
+      var casos = keys.map(function(k) { return CASOS[k]; });
+
+      // KPIs
+      var totalHa = casos.reduce(function(s, c) { return s + (c.ha_total || 0); }, 0);
+      var anos = new Set(casos.map(function(c) { return (c.inicio || '').slice(-4); }));
+      var provs = new Set(casos.map(function(c) { return c.lugar.split('·')[1] ? c.lugar.split('·')[1].trim() : c.lugar; }));
+
+      document.getElementById('kpi-ha').textContent = (totalHa / 1000).toFixed(0) + 'K';
+      document.getElementById('kpi-casos').textContent = keys.length;
+      document.getElementById('kpi-anos').textContent = anos.size;
+      document.getElementById('kpi-prov').textContent = provs.size;
+
+      // Colores por caso
+      var colores = ['#ff4500','#ffaa00','#ff6b35','#e03d00','#ff8c00','#cc3300'];
+
+      // Chart 1 — Hectáreas por caso (horizontal bar)
+      var labelsHa = casos.map(function(c) { return c.nombre; });
+      var dataHa   = casos.map(function(c) { return c.ha_total || 0; });
+
+      if (chartHa) chartHa.destroy();
+      var ctx1 = document.getElementById('chart-ha').getContext('2d');
+      chartHa = new Chart(ctx1, {
+        type: 'bar',
+        data: {
+          labels: labelsHa,
+          datasets: [{
+            data: dataHa,
+            backgroundColor: colores.map(function(c) { return c + 'cc'; }),
+            borderColor: colores,
+            borderWidth: 1,
+            borderRadius: 4
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true, maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(ctx) {
+                  return ' ' + ctx.raw.toLocaleString('es-AR') + ' ha';
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(255,255,255,0.05)' },
+              ticks: {
+                color: 'rgba(255,255,255,0.4)', font: { size: 10 },
+                callback: function(v) { return v >= 1000 ? (v/1000).toFixed(0)+'K' : v; }
+              }
+            },
+            y: {
+              grid: { display: false },
+              ticks: { color: 'rgba(255,255,255,0.7)', font: { size: 11 } }
+            }
+          }
+        }
+      });
+
+      // Chart 2 — Línea de tiempo (bubble / scatter por año)
+      var añosOrden = casos
+        .filter(function(c) { return c.inicio; })
+        .map(function(c, i) {
+          var match = c.inicio.match(/(\d{4})/);
+          return { label: c.nombre, año: match ? parseInt(match[1]) : 0, ha: c.ha_total || 0, color: colores[i] };
+        })
+        .sort(function(a, b) { return a.año - b.año; });
+
+      if (chartTiempo) chartTiempo.destroy();
+      var ctx2 = document.getElementById('chart-tiempo').getContext('2d');
+      chartTiempo = new Chart(ctx2, {
+        type: 'bubble',
+        data: {
+          datasets: añosOrden.map(function(d, i) {
+            return {
+              label: d.label,
+              data: [{ x: d.año, y: 0.5, r: Math.max(6, Math.sqrt(d.ha / 800)) }],
+              backgroundColor: d.color + 'bb',
+              borderColor: d.color,
+              borderWidth: 1.5
+            };
+          })
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(ctx) {
+                  return ctx.dataset.label + ' · ' + ctx.raw.x;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              type: 'linear', min: 2019, max: 2027,
+              grid: { color: 'rgba(255,255,255,0.05)' },
+              ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 10 }, stepSize: 1,
+                callback: function(v) { return Number.isInteger(v) ? v : ''; }
+              }
+            },
+            y: { display: false, min: 0, max: 1 }
+          }
+        }
+      });
+    }
+
+    window.toggleStats = toggleStats;
+    window.cerrarStatsOverlay = cerrarStatsOverlay;
+
     // ── Modal Ayuda (FAQ + Sobre fusionados) ──────────────────────────────────
     function toggleAyuda() {
       var ov = document.getElementById('ayuda-overlay');
