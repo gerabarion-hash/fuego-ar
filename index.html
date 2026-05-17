@@ -665,12 +665,26 @@
 
 
 
+
+    /* ── MODAL AYUDA ──────────────────────────────────────────────────────── */
+    #ayuda-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(4px);
+      z-index: 3000;
+      display: none;
+      align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    #ayuda-overlay.visible { display: flex; }
+
     /* ── MODAL ESTADÍSTICAS ──────────────────────────────────────────────── */
     #stats-overlay {
       position: fixed; inset: 0;
       background: rgba(0,0,0,0.78);
       backdrop-filter: blur(4px);
-      z-index: 3000; display: none;
+      z-index: 3000;
+      display: none;
       align-items: center; justify-content: center; padding: 20px;
     }
     #stats-overlay.visible { display: flex; }
@@ -1513,19 +1527,13 @@
     window.cerrarAyudaOverlay = cerrarAyudaOverlay;
     window.switchTab = switchTab;
 
-    function toggleFaq() {
-      document.getElementById('ayuda-overlay').classList.toggle('visible');
-      document.getElementById('panel-filtros').classList.remove('visible');
-    }
-    function cerrarFaqOverlay(e) {
-      if (e.target === document.getElementById('ayuda-overlay')) toggleAyuda();
-    }
     function toggleFaqItem(el) {
       var item = el.parentElement;
       var wasOpen = item.classList.contains('open');
       document.querySelectorAll('.faq-item.open').forEach(function(i) { i.classList.remove('open'); });
       if (!wasOpen) item.classList.add('open');
     }
+    window.toggleFaqItem = toggleFaqItem;
 
     // ── UI general ────────────────────────────────────────────────────────────
     function toggleFiltros() {
