@@ -388,24 +388,35 @@
     #leyenda {
       position: absolute;
       bottom: 32px; left: 16px;
-      background: rgba(13,13,13,0.82);
+      background: rgba(13,13,13,0.88);
       backdrop-filter: blur(6px);
-      border: 1px solid rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.08);
       border-radius: 8px;
-      padding: 8px;
+      padding: 9px 12px;
       z-index: 1000;
       pointer-events: none;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 5px;
+      gap: 4px;
+      min-width: 90px;
+    }
+    .ley-grupo-titulo {
+      font-size: 9px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .07em;
+      color: rgba(255,255,255,0.28);
+      margin-top: 2px;
+    }
+    .ley-fila-mini {
+      display: flex; align-items: center; gap: 7px;
+      font-size: 11px; color: rgba(255,255,255,0.55);
     }
     .ley-dot-mini {
       width: 10px; height: 10px;
       border-radius: 50%;
       border: 1.5px solid rgba(255,255,255,0.3);
+      flex-shrink: 0;
     }
-    .ley-divider { width: 14px; height: 1px; background: rgba(255,255,255,0.1); }
+    .ley-divider { height: 1px; background: rgba(255,255,255,0.07); margin: 3px 0; }
 
     /* ── LOADING HISTÓRICO ───────────────────────────────────────────────── */
     #hist-loading { display: none; font-size: 11px; color: rgba(255,255,255,0.4); align-items: center; gap: 6px; }
@@ -821,15 +832,15 @@
 
   <!-- ── LEYENDA ───────────────────────────────────────────────────────────── -->
   <div id="leyenda">
-    <div class="ley-dot-mini" style="background:rgba(255,69,0,0.35);border-color:#ff4500;" title="Alta confiabilidad"></div>
-    <div class="ley-dot-mini" style="background:rgba(255,170,0,0.35);border-color:#ffaa00;" title="Nominal"></div>
-    <div class="ley-dot-mini" style="background:rgba(200,200,200,0.15);border-color:rgba(200,200,200,0.4);" title="Baja confiabilidad"></div>
+    <div class="ley-grupo-titulo">Confiabilidad</div>
+    <div class="ley-fila-mini"><div class="ley-dot-mini" style="background:rgba(255,69,0,0.35);border-color:#ff4500;"></div><span>Alta</span></div>
+    <div class="ley-fila-mini"><div class="ley-dot-mini" style="background:rgba(255,170,0,0.35);border-color:#ffaa00;"></div><span>Nominal</span></div>
+    <div class="ley-fila-mini"><div class="ley-dot-mini" style="background:rgba(200,200,200,0.15);border-color:rgba(200,200,200,0.4);"></div><span>Baja</span></div>
     <div class="ley-divider"></div>
-    <div style="display:flex;gap:3px;align-items:center;">
-      <div class="ley-dot-mini" style="width:7px;height:7px;background:rgba(255,69,0,0.15);border-color:#ff4500;" title="FRP bajo"></div>
-      <div class="ley-dot-mini" style="width:11px;height:11px;background:rgba(255,69,0,0.15);border-color:#ff4500;" title="FRP medio"></div>
-      <div class="ley-dot-mini" style="width:15px;height:15px;background:rgba(255,69,0,0.15);border-color:#ff4500;" title="FRP alto"></div>
-    </div>
+    <div class="ley-grupo-titulo">Intensidad (FRP)</div>
+    <div class="ley-fila-mini"><div class="ley-dot-mini" style="width:7px;height:7px;background:rgba(255,69,0,0.15);border-color:#ff4500;flex-shrink:0;"></div><span>Baja</span></div>
+    <div class="ley-fila-mini"><div class="ley-dot-mini" style="width:11px;height:11px;background:rgba(255,69,0,0.15);border-color:#ff4500;flex-shrink:0;"></div><span>Media</span></div>
+    <div class="ley-fila-mini"><div class="ley-dot-mini" style="width:15px;height:15px;background:rgba(255,69,0,0.15);border-color:#ff4500;flex-shrink:0;"></div><span>Alta</span></div>
   </div>
 
   <!-- ── PANEL CAPAS HISTÓRICAS ACTIVO ────────────────────────────────────── -->
@@ -2252,15 +2263,27 @@
       }
     }
     function ajustarBrillo(val) {
+      window._brilloActual = parseInt(val);
       document.getElementById('brillo-val').textContent = val + '%';
-      var layers = document.querySelectorAll('.leaflet-layer img, .leaflet-image-layer');
-      layers.forEach(function(el) { el.style.filter = 'brightness(' + (val/100) + ')'; });
+      _aplicarBrillo(val);
     }
     function ajustarBrilloSentinel(val) {
+      window._brilloActual = parseInt(val);
       document.getElementById('brillo-sentinel-val').textContent = val + '%';
-      var layers = document.querySelectorAll('.leaflet-layer img, .leaflet-image-layer');
-      layers.forEach(function(el) { el.style.filter = 'brightness(' + (val/100) + ')'; });
+      _aplicarBrillo(val);
     }
+    function _aplicarBrillo(val) {
+      document.querySelectorAll('.leaflet-layer img, .leaflet-image-layer').forEach(function(el) {
+        el.style.filter = 'brightness(' + (val/100) + ')';
+      });
+    }
+    // Aplica el brillo guardado cuando se carga un tile nuevo
+    mapa.on('layeradd', function() {
+      if (window._brilloActual && window._brilloActual !== 100) {
+        setTimeout(function() { _aplicarBrillo(window._brilloActual); }, 50);
+      }
+    });
+    window._brilloActual = 100;
     window.ajustarBrillo = ajustarBrillo;
     window.ajustarBrilloSentinel = ajustarBrilloSentinel;
 
