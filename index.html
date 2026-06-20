@@ -74,7 +74,7 @@
       #nav-btns button { width: 100%; text-align: left; }
     }
 
-    #btn-filtros, #btn-toggle-focos, #btn-historico, #btn-ayuda, #btn-stats {
+    #btn-filtros, #btn-toggle-focos, #btn-historico, #btn-ayuda, #btn-stats, #btn-conae {
       background: rgba(255,255,255,0.08);
       border: 1px solid rgba(255,255,255,0.15);
       color: #e8e8e8;
@@ -86,7 +86,8 @@
       transition: background .2s;
       white-space: nowrap;
     }
-    #btn-filtros:hover, #btn-toggle-focos:hover, #btn-historico:hover, #btn-ayuda:hover, #btn-stats:hover { background: rgba(255,255,255,0.14); }
+    #btn-filtros:hover, #btn-toggle-focos:hover, #btn-historico:hover, #btn-ayuda:hover, #btn-stats:hover, #btn-conae:hover { background: rgba(255,255,255,0.14); }
+    #btn-conae.activo { background: rgba(255,69,0,0.2); border-color: rgba(255,69,0,0.5); color: #ff6b35; }
     #btn-toggle-focos.oculto { opacity: 0.4; }
 
     /* ── PANEL FILTROS ────────────────────────────────────────────────────── */
@@ -813,6 +814,7 @@
       <button id="btn-toggle-focos" onclick="toggleFocos()">🔥 Ocultar focos</button>
       <button id="btn-historico" onclick="toggleHistorico()">📂 Casos históricos</button>
       <button id="btn-stats" onclick="toggleStats()">📊 Estadísticas</button>
+      <button id="btn-conae" onclick="toggleCapaConae()">🗺 Área quemada</button>
       <button id="btn-ayuda" onclick="toggleAyuda()">? Ayuda</button>
     </div>
     <div id="contador-header">Focos: <strong id="num-focos">—</strong></div>
@@ -2335,6 +2337,90 @@
       });
     }
     bloquearLeaflet();
+
+    // ── Capa CONAE — Área quemada histórica por departamento ─────────────────
+    var capaConae = null;
+    var conaeData = null;
+    var conaeActiva = false;
+
+    function colorPorHa(ha) {
+      if (ha > 200000) return '#7B0000';
+      if (ha > 100000) return '#CC0000';
+      if (ha > 50000)  return '#FF4500';
+      if (ha > 20000)  return '#FF8C00';
+      if (ha > 5000)   return '#FFA500';
+      if (ha > 1000)   return '#FFD700';
+      return '#FFFACD';
+    }
+
+    function toggleCapaConae() {
+      var btn = document.getElementById('btn-conae');
+      if (conaeActiva) {
+        if (capaConae) { mapa.removeLayer(capaConae); capaConae = null; }
+        conaeActiva = false;
+        btn.classList.remove('activo');
+        mostrarLeyendaConae(false);
+        return;
+      }
+      btn.textContent = '🗺 Cargando...';
+      if (conaeData) {
+        mostrarCapaConae();
+      } else {
+        fetch('conae_quemado.geojson')
+          .then(function(r) { return r.json(); })
+          .then(function(data) { conaeData = data; mostrarCapaConae(); })
+          .catch(function() { btn.textContent = '🗺 Área quemada'; });
+      }
+    }
+
+    function mostrarCapaConae() {
+      var btn = document.getElementById('btn-conae');
+      capaConae = L.geoJSON(conaeData, {
+        style: function(f) {
+          var ha = f.properties.ha_total || 0;
+          return { fillColor: colorPorHa(ha), fillOpacity: ha > 0 ? 0.65 : 0, color: 'rgba(0,0,0,0.2)', weight: 0.5 };
+        },
+        onEachFeature: function(f, layer) {
+          var p = f.properties;
+          var ha = (p.ha_total || 0).toLocaleString('es-AR');
+          layer.bindPopup(
+            '<div class="popup-titulo">🗺 ' + p.nombre_dpt + '</div>' +
+            '<div class="popup-fila"><span class="popup-key">Provincia</span><span class="popup-val">' + p.nombre_pro + '</span></div>' +
+            '<div class="popup-fila"><span class="popup-key">Área quemada total</span><span class="popup-val">' + ha + ' ha</span></div>' +
+            '<div class="popup-fila"><span class="popup-key">Período</span><span class="popup-val">ago 2017 – mar 2026</span></div>' +
+            '<div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:6px;">Fuente: CONAE · Monitoreo satelital</div>'
+          );
+          layer.on('mouseover', function() { layer.setStyle({ fillOpacity: 0.85, weight: 1.5, color: '#ff6b35' }); });
+          layer.on('mouseout',  function() { capaConae.resetStyle(layer); });
+        }
+      });
+      capaConae.addTo(mapa);
+      conaeActiva = true;
+      btn.classList.add('activo');
+      btn.textContent = '🗺 Área quemada';
+      mostrarLeyendaConae(true);
+    }
+
+    var leyendaConaeEl = null;
+    function mostrarLeyendaConae(mostrar) {
+      if (!mostrar) { if (leyendaConaeEl) { mapa.removeControl(leyendaConaeEl); leyendaConaeEl = null; } return; }
+      var LeyConae = L.Control.extend({
+        onAdd: function() {
+          var div = L.DomUtil.create('div');
+          div.style.cssText = 'background:rgba(13,13,13,0.9);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:9px 12px;font-family:Barlow,sans-serif;font-size:11px;color:rgba(255,255,255,0.55);min-width:130px;margin-bottom:10px;';
+          div.innerHTML = '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:rgba(255,255,255,0.3);margin-bottom:6px;">Área quemada total</div>' +
+            [['#7B0000','>200.000 ha'],['#CC0000','100–200K ha'],['#FF4500','50–100K ha'],
+             ['#FF8C00','20–50K ha'],['#FFA500','5–20K ha'],['#FFD700','1–5K ha'],['#FFFACD','<1.000 ha']]
+            .map(function(i) { return '<div style="display:flex;align-items:center;gap:7px;margin-bottom:4px;"><div style="width:12px;height:12px;border-radius:2px;background:' + i[0] + ';flex-shrink:0;"></div>' + i[1] + '</div>'; }).join('') +
+            '<div style="font-size:9px;color:rgba(255,255,255,0.2);margin-top:6px;">CONAE · 2017–2026</div>';
+          L.DomEvent.disableClickPropagation(div);
+          return div;
+        }
+      });
+      leyendaConaeEl = new LeyConae({ position: 'bottomleft' });
+      leyendaConaeEl.addTo(mapa);
+    }
+    window.toggleCapaConae = toggleCapaConae;
 
     cargarDatos();
   </script>
