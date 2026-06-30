@@ -88,6 +88,16 @@
     }
     #btn-filtros:hover, #btn-toggle-focos:hover, #btn-historico:hover, #btn-ayuda:hover, #btn-stats:hover, #btn-conae:hover { background: rgba(255,255,255,0.14); }
     #btn-conae.activo { background: rgba(255,69,0,0.2); border-color: rgba(255,69,0,0.5); color: #ff6b35; }
+    .btn-anio-conae {
+      padding: 5px 10px;
+      border-radius: 5px; font-size: 12px; font-weight: 600;
+      font-family: 'Barlow', sans-serif; cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.6);
+      transition: all .15s;
+    }
+    .btn-anio-conae:hover { background: rgba(255,69,0,0.15); border-color: #ff4500; color: #ff6b35; }
+    .btn-anio-conae.activo { background: #ff4500; border-color: #ff4500; color: white; }
     #btn-toggle-focos.oculto { opacity: 0.4; }
 
     /* ── PANEL FILTROS ────────────────────────────────────────────────────── */
@@ -829,6 +839,31 @@
       <div style="grid-column:1/-1;text-align:center;padding:20px;color:rgba(255,255,255,0.3);font-size:13px;">
         Cargando casos...
       </div>
+    </div>
+  </div>
+
+  <!-- ── PANEL SELECTOR AÑO CONAE ─────────────────────────────────────────── -->
+  <div id="panel-conae-anio" style="
+    display:none; position:absolute; top:62px; left:50%;
+    transform:translateX(-50%);
+    background:rgba(13,13,13,0.95); backdrop-filter:blur(10px);
+    border:1px solid rgba(255,255,255,0.1); border-radius:10px;
+    z-index:1500; padding:12px 16px;">
+    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:rgba(255,255,255,0.3);margin-bottom:8px;">
+      Área quemada detectada por satélite · CONAE
+    </div>
+    <div style="display:flex;gap:5px;flex-wrap:wrap;max-width:480px;">
+      <button class="btn-anio-conae activo" data-anio="total" onclick="cambiarAnioConae('total')">Total histórico</button>
+      <button class="btn-anio-conae" data-anio="2017" onclick="cambiarAnioConae('2017')">2017</button>
+      <button class="btn-anio-conae" data-anio="2018" onclick="cambiarAnioConae('2018')">2018</button>
+      <button class="btn-anio-conae" data-anio="2019" onclick="cambiarAnioConae('2019')">2019</button>
+      <button class="btn-anio-conae" data-anio="2020" onclick="cambiarAnioConae('2020')">2020</button>
+      <button class="btn-anio-conae" data-anio="2021" onclick="cambiarAnioConae('2021')">2021</button>
+      <button class="btn-anio-conae" data-anio="2022" onclick="cambiarAnioConae('2022')">2022</button>
+      <button class="btn-anio-conae" data-anio="2023" onclick="cambiarAnioConae('2023')">2023</button>
+      <button class="btn-anio-conae" data-anio="2024" onclick="cambiarAnioConae('2024')">2024</button>
+      <button class="btn-anio-conae" data-anio="2025" onclick="cambiarAnioConae('2025')">2025</button>
+      <button class="btn-anio-conae" data-anio="2026" onclick="cambiarAnioConae('2026')">2026</button>
     </div>
   </div>
 
@@ -2343,6 +2378,18 @@
     var conaeData = null;
     var conaeActiva = false;
 
+    var conaeAnioActual = 'total'; // 'total' o '2017','2018',...
+
+    function haParaFeature(props) {
+      if (conaeAnioActual === 'total') return props.ha_total || 0;
+      // Sumar todos los meses del año seleccionado
+      var total = 0;
+      for (var k in props) {
+        if (k.startsWith(conaeAnioActual + '-')) total += (props[k] || 0);
+      }
+      return total;
+    }
+
     function colorPorHa(ha) {
       if (ha > 200000) return '#7B0000';
       if (ha > 100000) return '#CC0000';
@@ -2360,6 +2407,8 @@
         conaeActiva = false;
         btn.classList.remove('activo');
         mostrarLeyendaConae(false);
+        document.getElementById('panel-conae-anio').style.display = 'none';
+        conaeAnioActual = 'total';
         return;
       }
       btn.textContent = '🗺 Cargando...';
@@ -2377,12 +2426,12 @@
       var btn = document.getElementById('btn-conae');
       capaConae = L.geoJSON(conaeData, {
         style: function(f) {
-          var ha = f.properties.ha_total || 0;
-          return { fillColor: colorPorHa(ha), fillOpacity: ha > 0 ? 0.65 : 0, color: 'rgba(0,0,0,0.2)', weight: 0.5 };
+          var ha = haParaFeature(f.properties);
+          return { fillColor: colorPorHa(ha), fillOpacity: 0.55, color: 'rgba(0,0,0,0.15)', weight: 0.4 };
         },
         onEachFeature: function(f, layer) {
           var p = f.properties;
-          var ha = (p.ha_total || 0).toLocaleString('es-AR');
+          var ha = haParaFeature(p).toLocaleString('es-AR');
           layer.bindPopup(
             '<div class="popup-titulo">🗺 ' + p.nombre_dpt + '</div>' +
             '<div class="popup-fila"><span class="popup-key">Provincia</span><span class="popup-val">' + p.nombre_pro + '</span></div>' +
@@ -2399,6 +2448,7 @@
       btn.classList.add('activo');
       btn.textContent = '🗺 Área quemada';
       mostrarLeyendaConae(true);
+      document.getElementById('panel-conae-anio').style.display = 'block';
     }
 
     var leyendaConaeEl = null;
@@ -2420,6 +2470,23 @@
       leyendaConaeEl = new LeyConae({ position: 'bottomleft' });
       leyendaConaeEl.addTo(mapa);
     }
+    function cambiarAnioConae(anio) {
+      conaeAnioActual = anio;
+      // Actualizar botones activos
+      document.querySelectorAll('.btn-anio-conae').forEach(function(b) {
+        b.classList.toggle('activo', b.dataset.anio === anio);
+      });
+      // Refrescar estilos en el mapa
+      if (capaConae) {
+        capaConae.eachLayer(function(layer) {
+          var ha = haParaFeature(layer.feature.properties);
+          layer.setStyle({ fillColor: colorPorHa(ha), fillOpacity: 0.55 });
+        });
+      }
+      // Actualizar leyenda
+      mostrarLeyendaConae(true);
+    }
+    window.cambiarAnioConae = cambiarAnioConae;
     window.toggleCapaConae = toggleCapaConae;
 
     cargarDatos();
